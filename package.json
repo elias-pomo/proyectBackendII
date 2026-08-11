@@ -4,21 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
+  "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
-    "mongoose": "^9.9.1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/elias-pomo/proyectBackendII.git"
-  },
-  "bugs": {
-    "url": "https://github.com/elias-pomo/proyectBackendII/issues"
-  },
-  "homepage": "https://github.com/elias-pomo/proyectBackendII#readme"
+    "mongoose": "^9.9.1",
+    "nodemon": "^3.1.14"
+  }
 }
