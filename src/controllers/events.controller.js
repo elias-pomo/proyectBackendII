@@ -1,3 +1,3 @@
-const getEvents = ( req, res) =>{
+export const getEvents = ( req, res) =>{
     res.status(200).json({status: 'success', payload: []});
 };
