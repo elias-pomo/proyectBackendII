@@ -1,16 +1,24 @@
 {
-  "name": "proyectocursada",
+  "name": "proyectocursoi",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "node --watch src/app.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "type": "module",
+  "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1"
-  }
+    "express": "^5.2.1",
+    "mongoose": "^9.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elias-pomo/proyectBackendII.git"
+  },
+  "bugs": {
+    "url": "https://github.com/elias-pomo/proyectBackendII/issues"
+  },
+  "homepage": "https://github.com/elias-pomo/proyectBackendII#readme"
 }
