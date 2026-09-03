@@ -24,7 +24,7 @@ export default class SessionsService {
             throw { status: 400, message: "La contraseña debe tener al menos 6 caracteres" };
         }
 
-        // Aquí es donde se usa usersRepository
+        
         const existingUser = await usersRepository.getUserByEmail(normalizedEmail);
         if (existingUser) {
             throw { status: 409, message: "El email ya está registrado" };

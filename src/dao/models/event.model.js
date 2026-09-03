@@ -27,7 +27,7 @@ const EventsSchema=new mongoose.Schema(
     },
     {
         timestamps: true,
-        // collection: "productos2022",
+        
         strict: false, 
     }
 )
