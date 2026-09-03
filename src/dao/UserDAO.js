@@ -1,12 +1,11 @@
 import { userModel} from './models/user.model.js'
 
-export class UserDAO{
-    async getBy(filtro={}){
-        return await userModel.findOne(filtro).lean();
+export default class UserDao {
+    async findByEmail(email) {
+        return await userModel.findOne({ email });
     }
 
-    async create(user={}){
-        let newUser = await userModel.create(user);
-        return newUser.toJSON() //deshidrata el docu de mongoose igual que .lean()
+    async save(userData) {
+        return await userModel.create(userData);
     }
 }

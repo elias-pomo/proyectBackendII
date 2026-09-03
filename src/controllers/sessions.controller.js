@@ -1,16 +1,20 @@
-export const rester=async(req, res) =>{
-    let{firstName, lastName, email, password}=req.body
-    if(!firstName || !email || !password){
-        rester.setHeader('Content-type', 'application/json');
-        return res.status(400).json({error:"fistName | lastName | password"});
-    }
-    try {
-        let existe=await userDAO
+import SessionsService from '../services/sessions.service.js';
 
+const sessionsService = new SessionsService();
 
-        res.setHeader('content-type', 'application/json')
-        res.status(200).json({})
-    } catch (error) {
-        
+export default class SessionsController {
+    register = async (req, res) => {
+        try {
+            const responsePayload = await sessionsService.register(req.body);
+            res.status(201).json({
+                status: "success",
+                payload: responsePayload
+            });
+        } catch (error) {
+            res.status(error.status || 500).json({
+                status: "error",
+                message: error.message || "Error interno del servidor"
+            });
+        }
     }
 }

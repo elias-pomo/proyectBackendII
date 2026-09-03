@@ -34,5 +34,5 @@ const EventsSchema=new mongoose.Schema(
 
 export const eventModel=mongoose.model(
     "events", 
-    eventsSchema
+    EventsSchema
 )

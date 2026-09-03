@@ -1,3 +1,4 @@
+import 'dotenv/config';
 process.loadEnvFile("./.env")
 
 export const config={

@@ -1,4 +1,4 @@
-import { eventModel } from "./models/event.model";
+import { eventModel } from "./models/event.model.js";
 
 export class EventsDAO{
     async get(filtro={}){

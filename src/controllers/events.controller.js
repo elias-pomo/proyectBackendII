@@ -1,11 +1,11 @@
 export class EventsController{
-    constructor(EventDAO){
-        this.EventDAO=EventDAO 
+    constructor(eventDAO){
+        this.eventDAO=eventDAO 
     }
 
     getEvents = async (req, res) =>{
         try {
-            let eventos = await this.EventDAO.get()
+            let eventos = await this.eventsDAO.get()
 
         res.setHeader('content-type', 'application/json')
         res.status(200).json({message:"listado de eventos", eventos})
