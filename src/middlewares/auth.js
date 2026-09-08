@@ -1,10 +1,11 @@
 import { config } from "../config/config.js";
 
 export const auth = (req, res, next) =>{
-    if(req.query.user!="admin" || req.query.password != config.general.SECRET){
-
+    if(!req.session.user){
         res.setHeader('Content-Type','application/json');
-        return res.status(401).json({error:`Credenciales invalidas`})
-    }
-    next()
+        res.status(401).json({
+            error:"no existe usuarios autenticados"
+    })
+}
+next()
 }

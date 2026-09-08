@@ -5,6 +5,7 @@ import  { connDB }  from './config/database.js';
 import { config } from './config/config.js';
 import {errorHandler} from './middlewares/errorHandler.js';
 import sessionsRouter from './routes/sessions.routes.js';
+import session from 'express-session';
 
 const PORT=config.general.PORT;
 
@@ -14,9 +15,14 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(session({
+    secret: config.general.SECRET,
+    saveUninitialized: false,
+    resave: false,
+}));
+
 app.use("/api/events",eventsRouter);
 app.use('/api/sessions', sessionsRouter);
-
 app.get('/',(req, res)=>{
 
 

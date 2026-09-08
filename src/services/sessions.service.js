@@ -1,6 +1,6 @@
 import UsersRepository from '../repositories/users.repositories.js';
 import UserDAO from '../dao/UserDAO.js';
-import { createHash } from '../utils/hash.js';
+import { createHash, validaHash } from '../utils/hash.js';
 
 const userDAO = new UserDAO();
 const usersRepository = new UsersRepository(userDAO);
@@ -49,5 +49,40 @@ export default class SessionsService {
             email: result.email,
             role: result.role
         };
+    }
+
+    async login(email, password) {
+        if (!email || !password) {
+            throw { status: 400, message: "Faltan campos obligatorios" };
+        }
+
+        const user = await usersRepository.getUserByEmail(email);
+        if (!user) {
+            throw { status: 401, message: "Credenciales inválidas" };
+        }
+
+        if (!validaHash(password, user.password)) {
+            throw { status: 401, message: "Credenciales inválidas" };
+        }
+
+        return {
+            id: user._id,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            email: user.email,
+            role: user.role
+        };
+    }
+
+    async logout(req, res) {
+        return new Promise((resolve, reject) => {
+            req.session.destroy(error => {
+                if (error) {
+                    reject({ status: 500, message: "Fallo en el proceso de logout" });
+                } else {
+                    resolve("Logout exitoso");
+                }
+            });
+        });
     }
 }
