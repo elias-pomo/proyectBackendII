@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha --timeout 10000 tests/**/*.test.js",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js"
   },
@@ -14,10 +14,20 @@
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-handlebars": "^9.0.1",
     "express-session": "^1.19.0",
+    "handlebars": "^4.7.9",
+    "jsonwebtoken": "^9.0.3",
+    "jwt": "^0.2.0",
     "mongoose": "^9.9.1",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "chai": "^6.2.2",
+    "mocha": "^12.0.1",
+    "supertest": "^7.2.2"
   }
 }

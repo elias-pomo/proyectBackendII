@@ -12,8 +12,11 @@ Instalación y ejecución:
 
 3. Configurar las variables de entorno:
    Crear un archivo .env en la raíz del proyecto tomando como referencia el archivo .env.example:
-   PORT=8080
-   MONGO_URL=mongodb://127.0.0.1:27017/backend2
+   PORT=
+   MONGO_URL=mongodb+srv://<usuario>:<password>@cluster0.mongodb.net/backend2
+   JWT_SECRET=tu_palabra_secreta_super_segura
+   JWT_EXPIRES_IN=
+   NODE_ENV=
 
 4. Iniciar el servidor en modo desarrollo:
    npm run dev
@@ -66,8 +69,57 @@ Respuestas del Servidor:
   "message": "El email ya está registrado"
   }
 
+2. Inicio de Sesión (Login)
+   Método: POST
+
+Ruta: /api/sessions/login
+
+Descripción: Valida credenciales, genera un JWT y lo inyecta en una cookie HTTP Only llamada currentUser.
+JSON
+{
+"email": "ana@mail.com",
+"password": "Secreta123"
+}
+Respuestas:
+
+200 OK (Login exitoso - Setea cookie currentUser)
+401 Unauthorized (Credenciales inválidas - Mensaje genérico por seguridad)
+
+3. Obtener Usuario Actual (Current)
+   Método: GET
+
+Ruta: /api/sessions/current
+
+Descripción: Ruta protegida. El middleware lee la cookie, verifica el JWT y devuelve los datos del usuario autenticado.
+
+Headers/Body: No requiere. Depende de la cookie currentUser.
+
+Respuestas:
+
+200 OK (Autenticado)
+401 Unauthorized (Sin cookie o token expirado/inválido)
+
+4. Cerrar Sesión (Logout)
+   Método: POST
+
+Ruta: /api/sessions/logout
+
+Descripción: Elimina la cookie currentUser para cerrar la sesión del usuario.
+
+Respuestas:
+
+200 OK (Cookie eliminada)
+
 Cómo probar el sistema:
 
-1. Abrir Postman o Thunder Client.
-2. Configurar una petición POST apuntando a http://localhost:8080/api/sessions/register.
-3. Verificar en MongoDB Compass que el documento se encuentre almacenado en la base de datos proyecto_cursada, dentro de la colección users, y comprobar que el campo password esté correctamente hasheado con bcrypt (comenzando con $2b$...).
+Para verificar el flujo de autenticación, te recomiendo usar Postman y seguir este orden:
+
+1. Registrar un usuario en /api/sessions/register.
+
+2. Iniciar sesión en /api/sessions/login con esas credenciales. (Verificar en Postman que la pestaña "Cookies" ahora contiene currentUser).
+
+3. Hacer una petición GET a /api/sessions/current para ver la información desencriptada del token.
+
+4. Ejecutar el Logout en /api/sessions/logout (Verificar que la cookie desaparece).
+
+5. Intentar acceder nuevamente a /api/sessions/current para confirmar que el sistema responde con un error 401 No autenticado.
