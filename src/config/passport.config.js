@@ -5,6 +5,16 @@ import { createHash, validaHash } from "../utils/hash.js";
 import { Strategy as JwtStrategy } from "passport-jwt";
 import { config } from "./config.js";
 
+const cookieExtractor = req =>{
+    let token = null;
+    if(req && req.cookies){
+        token = req.cookies.currentUser
+    }
+    return token;
+}
+
+export const initializePassport = () =>{
+
 passport.use(
     'register',
     new LocalStrategy({
@@ -82,14 +92,6 @@ passport.use(
 )
 )
 
-const cookieExtractor = req =>{
-    let token = null;
-    if(req && req.cookies){
-        token = req.cookies.currentUser
-    }
-    return token;
-}
-
 passport.use(
     'current',
     new JwtStrategy({
@@ -112,3 +114,5 @@ passport.use(
         }
     )
 )
+
+}
