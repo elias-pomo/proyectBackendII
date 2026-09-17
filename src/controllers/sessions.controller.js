@@ -41,7 +41,7 @@ export default class SessionsController {
                     name: req.user.first_name,
                     email: req.user.email,
                     role: req.user.role
-                }, token});
+                }});
         } catch (error) {
             console.error(error);
             res.status(error.status || 500).json({
