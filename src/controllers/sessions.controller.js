@@ -12,9 +12,9 @@ export default class SessionsController {
             res.status(201).json({
                 status: "success",
                 payload:{
-                    name: responsePayload.first_name,
-                    email: responsePayload.email,
-                    role: responsePayload.role
+                    name: req.user.first_name,
+                    email: req.user.email,
+                    role: req.user.role
                 }
             });
         } catch (error) {
@@ -38,9 +38,9 @@ export default class SessionsController {
                 status:"success", 
                 message:"Login exitoso", 
                 payload:{
-                    name: responsePayload.first_name,
-                    email: responsePayload.email,
-                    role: responsePayload.role
+                    name: req.user.first_name,
+                    email: req.user.email,
+                    role: req.user.role
                 }, token});
         } catch (error) {
             console.error(error);
@@ -71,4 +71,19 @@ export default class SessionsController {
             });
         }
     }
+
+    currentUser = async (req, res) => {
+    res.status(200).json({
+        status: 'success',
+        payload:{
+            id: req.user._id,
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            email: req.user.email,
+            role: req.user.role
+            }
+        }
+    )  
+}
+
 }

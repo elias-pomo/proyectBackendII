@@ -9,6 +9,8 @@ import {engine} from 'express-handlebars';
 import path from 'path';
 import { auth } from './middlewares/auth.js';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
+import './config/passport.config.js';
 
 const PORT=config.general.PORT;
 
@@ -26,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(passport.initialize());     
 app.use(session({
     secret: config.general.SECRET,
     saveUninitialized: false,
