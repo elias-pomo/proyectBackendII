@@ -7,15 +7,38 @@ const router = Router();
 const sessionsController = new SessionsController();
 
 // Rutas de sesión
-router.post('/register',passport.authenticate('register',{
-    session:false,}), sessionsController.register);
-router.post('/login', passport.authenticate('login',{
-    session:false}), sessionsController.login);
+router.post('/register', (req, res, next) => {
+    passport.authenticate('register', { session: false }, (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            return res.status(400).json({
+                status: 'error',
+                message: info?.message || 'Error en el registro'
+            });
+        }
+        req.user = user;
+        next();
+    })(req, res, next);
+}, sessionsController.register);
+
+router.post('/login', (req, res, next) => {
+    passport.authenticate('login', { session: false }, (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+            return res.status(401).json({
+                status: 'error',
+                message: info?.message || 'Credenciales invalidas'
+            });
+        }
+        req.user = user;
+        next();
+    })(req, res, next);
+}, sessionsController.login);
 
 // Ruta protegida 
 router.post('/logout', auth, sessionsController.logout);
-router.get('/current', passport.authenticate('current',{
+router.get('/current',  passport.authenticate('current',{
     session: false
-}), auth, sessionsController.currentUser);
+}), sessionsController.currentUser);
 
 export default router;

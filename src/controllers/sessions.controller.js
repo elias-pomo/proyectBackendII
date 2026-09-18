@@ -1,14 +1,13 @@
 import { config } from '../config/config.js';
-import SessionsService from '../services/sessions.service.js';
 import jwt from 'jsonwebtoken';
 import { generateToken } from '../utils/jwt.js';
+import SessionsService  from '../services/sessions.service.js';
 
 const sessionsService = new SessionsService();
 
 export default class SessionsController {
     register = async (req, res) => {
         try {
-            const responsePayload = await sessionsService.register(req.body);
             res.status(201).json({
                 status: "success",
                 payload:{
@@ -26,8 +25,12 @@ export default class SessionsController {
     }
     login = async (req, res) => {
         try {
-            const responsePayload = await sessionsService.login(req.body.email, req.body.password);
-            const user = responsePayload;
+            const user = {
+                id: req.user._id,
+                name: req.user.first_name,
+                email: req.user.email,
+                role: req.user.role 
+            }
 
             let token = generateToken(user);
 
@@ -37,11 +40,7 @@ export default class SessionsController {
             res.status(200).json({
                 status:"success", 
                 message:"Login exitoso", 
-                payload:{
-                    name: req.user.first_name,
-                    email: req.user.email,
-                    role: req.user.role
-                }});
+                user});
         } catch (error) {
             console.error(error);
             res.status(error.status || 500).json({
@@ -77,8 +76,6 @@ export default class SessionsController {
         status: 'success',
         payload:{
             id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
             email: req.user.email,
             role: req.user.role
             }

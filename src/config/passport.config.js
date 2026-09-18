@@ -1,19 +1,12 @@
 import passport from "passport";
+import passportJWT from "passport-jwt"
 import { Strategy as LocalStrategy } from "passport-local";
 import { userModel } from "../dao/models/user.model.js";
 import { createHash, validaHash } from "../utils/hash.js";
 import { Strategy as JwtStrategy } from "passport-jwt";
 import { config } from "./config.js";
 
-const cookieExtractor = req =>{
-    let token = null;
-    if(req && req.cookies){
-        token = req.cookies.currentUser
-    }
-    return token;
-}
 
-export const initializePassport = () =>{
 
 passport.use(
     'register',
@@ -65,9 +58,15 @@ passport.use(
     },
     async (email, password, done) => {
         try {
+            if(!email || !password){
+                return done(null, false, {
+                    message: 'Faltan campos obligatorios'
+                })
+            }
+
             const normalizedEmail = email.toLowerCase().trim();
 
-            const user = await userModel.findOne({
+            let user = await userModel.findOne({
                 email: normalizedEmail
             })
 
@@ -91,16 +90,22 @@ passport.use(
     }
 )
 )
-
+const cookieExtractor = req =>{
+    let token = null;
+    if(req && req.cookies){
+        token = req.cookies.currentUser
+    }
+    return token;
+}
 passport.use(
     'current',
     new JwtStrategy({
         jwtFromRequest: cookieExtractor,
         secretOrKey: config.general.SECRET
     },
-    async (jwtPayload, done) =>{
+    async (jwtpayload, done) =>{
         try {
-            const user = await userModel.findById(jwtPayload.id);
+            const user = await userModel.findById(jwtpayload.id);
 
             if(!user){
                 return done(null, false,{
@@ -115,4 +120,3 @@ passport.use(
     )
 )
 
-}
