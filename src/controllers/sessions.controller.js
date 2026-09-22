@@ -1,9 +1,8 @@
 import { config } from '../config/config.js';
 import jwt from 'jsonwebtoken';
 import { generateToken } from '../utils/jwt.js';
-import SessionsService  from '../services/sessions.service.js';
 
-const sessionsService = new SessionsService();
+
 
 export default class SessionsController {
     register = async (req, res) => {
@@ -26,7 +25,6 @@ export default class SessionsController {
     login = async (req, res) => {
         try {
             const user = {
-                id: req.user._id,
                 name: req.user.first_name,
                 email: req.user.email,
                 role: req.user.role 
@@ -52,16 +50,10 @@ export default class SessionsController {
 
     logout = async (req, res) =>{
         try {
-            const responsePayload = await sessionsService.logout(req, res);
             res.clearCookie('currentUser',{ httpOnly: true });
             res.status(200).json({
                 status:"success",
                 message:"Logout exitoso",
-                payload:{
-                    name: responsePayload.first_name,
-                    email: responsePayload.email,
-                    role: responsePayload.role
-                }
             });
         } catch (error) {
             res.status(error.status || 500).json({

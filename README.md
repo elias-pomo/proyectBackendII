@@ -1,6 +1,4 @@
-# Plataforma de Inscripciones - Pre-entrega 2
-
-Implementación del flujo seguro de registro de usuarios con validación, normalización de correo, encriptación de contraseñas mediante bcrypt y persistencia en MongoDB, respetando la arquitectura en capas (ruta -> controller -> service -> repository/DAO -> modelo).
+# Proyecto Back-End II
 
 Instalación y ejecución:
 
@@ -21,94 +19,57 @@ Instalación y ejecución:
 4. Iniciar el servidor en modo desarrollo:
    npm run dev
 
+🔒 Arquitectura y Autenticación Centralizada (Passport.js)
+En esta versión, la API ha sido refactorizada para delegar el flujo de autenticación y autorización a Passport.js, mejorando la escalabilidad y limpieza de las rutas.
+
+1. Estrategias Centralizadas: Toda la lógica de autenticación (validación, normalización, uso de bcrypt para el registro y validación de credenciales en el login) se encuentra encapsulada en src/config/passport.config.js.
+2. Escalabilidad: El sistema está preparado y estructurado para integrar fácilmente futuros proveedores de autenticación externos (OAuth con Google, GitHub, etc.) sin necesidad de modificar el archivo principal de la aplicación (app.js).
+
 Documentación del Endpoint:
 
 - Método: POST
 - Ruta: /api/sessions/register
 - Headers: Content-Type: application/json
 
-Campos esperados en el Body (JSON):
+1. Registro de Usuario
+   Método: POST
+   Ruta: /api/sessions/register
 
-- first_name (String, obligatorio): Nombre del usuario.
-- last_name (String, obligatorio): Apellido del usuario.
-- email (String, obligatorio): Correo electrónico.
-- password (String, obligatorio): Contraseña de acceso (longitud mínima de 6 caracteres).
+Descripción: La ruta limpia delega la validación, normalización, encriptación con bcrypt y verificación de unicidad en MongoDB a la estrategia passport.authenticate('register'). Asigna automáticamente el rol por defecto.
 
-Ejemplo de Request:
-{
-"first_name": "Ana",
-"last_name": "Pérez",
-"email": "Ana@Mail.com",
-"password": "Secreta123"
-}
-
-Respuestas del Servidor:
-
-- 201 Created (Registro exitoso):
-  Devuelve el objeto creado sin exponer la contraseña (ni en texto plano ni hasheada).
-  {
-  "status": "success",
-  "payload": {
-  "id": "665f2a...",
-  "first_name": "Ana",
-  "last_name": "Pérez",
-  "email": "ana@mail.com",
-  "role": "user"
-  }
-  }
-
-- 400 Bad Request (Campos faltantes o formato inválido):
-  {
-  "status": "error",
-  "message": "Faltan campos obligatorios"
-  }
-
-- 409 Conflict (Usuario duplicado):
-  {
-  "status": "error",
-  "message": "El email ya está registrado"
-  }
+Respuestas:
+201 Created: Registro exitoso (devuelve el payload sin contraseña).
+400 Bad Request: Campos faltantes o formato inválido.
+409 Conflict: El email ya está registrado.
 
 2. Inicio de Sesión (Login)
    Método: POST
+   Ruta: /api/sessions/login
 
-Ruta: /api/sessions/login
+Descripción: Utiliza la estrategia de Passport para validar las credenciales. Tras una autenticación exitosa, el controller asume la responsabilidad de generar el JWT y configurar la cookie HTTP Only (currentUser).
 
-Descripción: Valida credenciales, genera un JWT y lo inyecta en una cookie HTTP Only llamada currentUser.
-JSON
-{
-"email": "ana@mail.com",
-"password": "Secreta123"
-}
 Respuestas:
-
-200 OK (Login exitoso - Setea cookie currentUser)
-401 Unauthorized (Credenciales inválidas - Mensaje genérico por seguridad)
+200 OK: Login exitoso (Setea cookie currentUser).
+401 Unauthorized: Credenciales inválidas (Mensaje genérico por seguridad).
 
 3. Obtener Usuario Actual (Current)
    Método: GET
+   Ruta: /api/sessions/current
 
-Ruta: /api/sessions/current
-
-Descripción: Ruta protegida. El middleware lee la cookie, verifica el JWT y devuelve los datos del usuario autenticado.
-
-Headers/Body: No requiere. Depende de la cookie currentUser.
+Descripción: Ruta protegida por la estrategia de Passport que extrae y valida el JWT directamente desde la cookie HTTP Only. Si es válido, inyecta los datos en req.user.
 
 Respuestas:
-
-200 OK (Autenticado)
-401 Unauthorized (Sin cookie o token expirado/inválido)
+200 OK: Autenticado. Devuelve { id, email, role } sin exponer datos sensibles.
+401 Unauthorized: Sin cookie, token expirado o manipulado.
 
 4. Cerrar Sesión (Logout)
    Método: POST
+   Ruta: /api/sessions/logout
 
-Ruta: /api/sessions/logout
-
-Descripción: Elimina la cookie currentUser para cerrar la sesión del usuario.
+Descripción: Elimina la cookie currentUser para cerrar la sesión de forma segura. No requiere pasar por Passport.
 
 Respuestas:
-
-200 OK (Cookie eliminada)
+200 OK: Cookie eliminada exitosamente.
 
 Cómo probar el sistema:
 
