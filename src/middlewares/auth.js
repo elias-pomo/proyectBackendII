@@ -13,7 +13,6 @@ export const auth=(req, res, next)=>{
 
     try {
         let user=jwt.verify(token, config.general.SECRET);
-        req.user=user
     } catch (error) {
         res.setHeader('Content-Type','application/json');
         return res.status(401).json({error:`Credenciales invalidas: ${error.message}`})

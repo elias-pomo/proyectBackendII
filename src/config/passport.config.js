@@ -19,7 +19,8 @@ export const initPassport = () =>{
         'register',
         new LocalStrategy({
             usernameField: 'email',
-            passReqToCallback: true
+            passReqToCallback: true,
+            badRequestMessage: 'Todos los campos son obligatorios'
         },
         async (req, email, password, done) => {
         try {
@@ -27,6 +28,7 @@ export const initPassport = () =>{
             
             if(!first_name || !last_name || !email || !password){
                 return done(null, false, {
+                    status: 400, 
                     message: 'Todos los campos son obligatorios'
                 })
             }
@@ -37,6 +39,7 @@ export const initPassport = () =>{
             
             if(userExists){
                 return done(null, false, {
+                    status:409,
                     message: 'El email ya esta registrado'
                 })
             }

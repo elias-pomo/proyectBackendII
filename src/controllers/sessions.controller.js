@@ -25,6 +25,7 @@ export default class SessionsController {
     login = async (req, res) => {
         try {
             const user = {
+                id: req.user._id,
                 name: req.user.first_name,
                 email: req.user.email,
                 role: req.user.role 

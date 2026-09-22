@@ -10,11 +10,10 @@ const sessionsController = new SessionsController();
 router.post('/register', (req, res, next) => {
     passport.authenticate('register', { session: false }, (err, user, info) => {
         if (err) return next(err);
+        
         if (!user) {
-            return res.status(400).json({
-                status: 'error',
-                message: info?.message || 'Error en el registro'
-            });
+            const statusCode = info.status ? info.status : 400; 
+            return res.status(statusCode).json({ error: info.message });
         }
         req.user = user;
         next();
