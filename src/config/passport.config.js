@@ -53,7 +53,9 @@ export const initPassport = () =>{
                 password: hashedPassword,
                 role: 'user'
             }
-                return done(null, newUser);
+                const createdUser = await userModel.create(newUser);
+
+                return done(null, createdUser);
             }catch (error) {
                 return done(error);
             }
@@ -109,7 +111,7 @@ passport.use(
     },
     async (jwtpayload, done) =>{
         try {
-            const user = await userModel.findById(jwtpayload.id);
+            const user = await userModel.findById(jwtpayload._id);
 
             if(!user){
                 return done(null, false,{

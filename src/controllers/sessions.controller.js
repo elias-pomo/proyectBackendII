@@ -25,7 +25,7 @@ export default class SessionsController {
     login = async (req, res) => {
         try {
             const user = {
-                id: req.user._id,
+                _id: req.user._id,
                 name: req.user.first_name,
                 email: req.user.email,
                 role: req.user.role 
@@ -33,7 +33,11 @@ export default class SessionsController {
 
             let token = generateToken(user);
 
-            res.cookie("currentUser", token, {httpOnly: true})
+            res.cookie("currentUser", token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            })
             res.setHeader('Content-Type','application/json')
 
             res.status(200).json({
@@ -51,7 +55,7 @@ export default class SessionsController {
 
     logout = async (req, res) =>{
         try {
-            res.clearCookie('currentUser',{ httpOnly: true });
+            res.clearCookie('currentUser',{ httpOnly: true,secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
             res.status(200).json({
                 status:"success",
                 message:"Logout exitoso",
@@ -68,7 +72,7 @@ export default class SessionsController {
     res.status(200).json({
         status: 'success',
         payload:{
-            id: req.user._id,
+            _id: req.user._id,
             email: req.user.email,
             role: req.user.role
             }
