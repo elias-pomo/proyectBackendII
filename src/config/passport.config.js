@@ -111,7 +111,7 @@ passport.use(
     },
     async (jwtpayload, done) =>{
         try {
-            const user = await userModel.findById(jwtpayload._id);
+            const user = await userModel.findById(jwtpayload._id).select('-password').lean();
 
             if(!user){
                 return done(null, false,{

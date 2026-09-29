@@ -4,6 +4,7 @@ import  { connDB }  from './config/database.js';
 import { config } from './config/config.js';
 import {errorHandler} from './middlewares/errorHandler.js';
 import sessionsRouter from './routes/sessions.routes.js';
+import usersRouter from './routes/users.routes.js'
 import session from 'express-session';
 import {engine} from 'express-handlebars';
 import path from 'path';
@@ -44,6 +45,7 @@ app.get('/',(req,res)=>{
 })
 app.use("/api/events",eventsRouter);
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/users', usersRouter);
 
 app.get('/test', auth,(req,res)=>{
     res.setHeader('Content-Type','application/json');
@@ -51,10 +53,6 @@ app.get('/test', auth,(req,res)=>{
 })
 
 app.use(errorHandler)
-
-const server=app.listen(PORT,()=>{
-    console.log(`Server escuchando en puerto ${PORT}`);
-});
 
 connDB(config.database.MONGO_URL, config.database.DB_NAME)
 

@@ -9,6 +9,11 @@ const EventsSchema=new mongoose.Schema(
         description: {type: String, minLength: [10, "Cantidad minima de caracteres de la descripcion: 10. Usted ingresó {VALUE}"]},  
         price:{
             type: Number, default: 0
+        },
+        organizer:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
         }, 
         capacity:{
             type: Number, 
@@ -26,9 +31,7 @@ const EventsSchema=new mongoose.Schema(
         }
     },
     {
-        timestamps: true,
-        
-        strict: false, 
+        timestamps: true, 
     }
 )
 

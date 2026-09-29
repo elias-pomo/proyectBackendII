@@ -2,6 +2,7 @@ import { Router } from 'express';
 import SessionsController from '../controllers/sessions.controller.js';
 import { auth } from '../middlewares/auth.js';
 import passport from 'passport';
+import { authorizeRoles } from '../middlewares/authorize.js';
 
 const router = Router();
 const sessionsController = new SessionsController();
@@ -36,8 +37,6 @@ router.post('/login', (req, res, next) => {
 
 // Ruta protegida 
 router.post('/logout', auth, sessionsController.logout);
-router.get('/current',  passport.authenticate('current',{
-    session: false
-}), sessionsController.currentUser);
+router.get('/current', auth, sessionsController.currentUser);
 
 export default router;

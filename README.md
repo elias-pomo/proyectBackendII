@@ -84,3 +84,81 @@ Para verificar el flujo de autenticación, te recomiendo usar Postman y seguir e
 4. Ejecutar el Logout en /api/sessions/logout (Verificar que la cookie desaparece).
 
 5. Intentar acceder nuevamente a /api/sessions/current para confirmar que el sistema responde con un error 401 No autenticado.
+
+# API de Eventos: Roles y autorización
+
+API REST para gestionar eventos, con autenticación mediante JWT en cookie y autorización por roles (`user`, `organizer`, `admin`). Las rutas se protegen con middlewares reutilizables, y las respuestas diferencian correctamente **401** (sin sesión) de **403** (sin permisos).
+
+## Roles
+
+| Rol         | Descripción                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------ |
+| `user`      | Rol por defecto. Puede iniciar sesión, consultar su sesión y ver el listado de eventos.    |
+| `organizer` | Además de lo anterior, crea eventos y **solo puede modificar o eliminar los suyos**.       |
+| `admin`     | Puede modificar o eliminar cualquier evento y gestionar usuarios (listar y cambiar roles). |
+
+### Cómo se asigna un rol
+
+- El registro público (`POST /api/sessions/register`) **siempre** crea un `user`. Cualquier campo `role` enviado en el body se ignora, por lo que no es posible crear `organizer` ni `admin` desde ahí.
+- Un `admin` cambia el rol de otro usuario con `PATCH /api/users/:uid/role`.
+
+## Matriz de permisos
+
+| Acción                                    | Sin sesión | user   | organizer | admin |
+| ----------------------------------------- | ---------- | ------ | --------- | ----- |
+| Registrarse / iniciar sesión              | ✅         | ✅     | ✅        | ✅    |
+| Listar eventos                            | ✅         | ✅     | ✅        | ✅    |
+| Ver sesión actual                         | ❌ 401     | ✅     | ✅        | ✅    |
+| Cerrar sesión                             | ❌ 401     | ✅     | ✅        | ✅    |
+| Crear evento                              | ❌ 401     | ❌ 403 | ✅        | ✅    |
+| Modificar / eliminar un evento **propio** | ❌ 401     | ❌ 403 | ✅        | ✅    |
+| Modificar / eliminar un evento **ajeno**  | ❌ 401     | ❌ 403 | ❌ 403    | ✅    |
+| Listar usuarios                           | ❌ 401     | ❌ 403 | ❌ 403    | ✅    |
+| Cambiar el rol de un usuario              | ❌ 401     | ❌ 403 | ❌ 403    | ✅    |
+
+### Públicas
+
+| Método | Ruta                     | Descripción                                      |
+| ------ | ------------------------ | ------------------------------------------------ |
+| POST   | `/api/sessions/register` | Registro (siempre con rol `user`)                |
+| POST   | `/api/sessions/login`    | Inicio de sesión (setea la cookie `currentUser`) |
+| GET    | `/api/events`            | Listado de eventos                               |
+
+### Protegidas
+
+| Método | Ruta                    | Acceso                                  | Respuestas              |
+| ------ | ----------------------- | --------------------------------------- | ----------------------- |
+| GET    | `/api/sessions/current` | Cualquier usuario autenticado           | 200, 401                |
+| POST   | `/api/sessions/logout`  | Cualquier usuario autenticado           | 200, 401                |
+| POST   | `/api/events`           | `organizer`, `admin`                    | 201, 400, 401, 403, 409 |
+| PUT    | `/api/events/:id`       | `organizer` (solo sus eventos), `admin` | 200, 400, 401, 403, 404 |
+| DELETE | `/api/events/:id`       | `organizer` (solo sus eventos), `admin` | 200, 400, 401, 403, 404 |
+| GET    | `/api/users`            | `admin`                                 | 200, 401, 403           |
+| PATCH  | `/api/users/:uid/role`  | `admin`                                 | 200, 400, 401, 403, 404 |
+
+## Middlewares
+
+Están separados de las rutas y son reutilizables (`src/middlewares/`):
+
+| Archivo             | Qué hace                                                                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auth..js`          | Lee el JWT de la cookie `currentUser`, lo valida con Passport, carga el usuario desde la base en `req.user` y responde **401** si no hay sesión válida. |
+| `authorize.js`      | Recibe los roles permitidos como parámetro, los compara con `req.user.role` y responde **403** si no coincide.                                          |
+| `authEventOwner.js` | Verifica que el usuario sea `admin` o el `organizer` dueño del evento; responde **404** si el evento no existe y **403** si no es el dueño.             |
+
+## Casos de prueba
+
+| Caso                                          | Resultado esperado |
+| --------------------------------------------- | ------------------ |
+| Cualquier ruta privada sin cookie             | 401                |
+| `POST /api/events` con rol `user`             | 403                |
+| `POST /api/events` con rol `organizer`        | 201                |
+| `GET /api/users` con rol `organizer`          | 403                |
+| `GET /api/users` con rol `admin`              | 200                |
+| `organizer` modificando un evento ajeno       | 403                |
+| `organizer` modificando un evento propio      | 200                |
+| `admin` modificando el evento de un organizer | 200                |
+
+## Evidencia
+
+Las capturas están en `evidencia`.
