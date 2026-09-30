@@ -11,7 +11,6 @@ import path from 'path';
 import { auth } from './middlewares/auth.js';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
-import './config/passport.config.js';
 import { initPassport } from './config/passport.config.js';
 
 const PORT=config.general.PORT;
@@ -28,9 +27,6 @@ app.set('views', path.join(import.meta.dirname, 'views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(passport.initialize());     
-initPassport();
-
 app.use(cookieParser());
 app.use(session({
     secret: config.general.SECRET,
@@ -38,6 +34,8 @@ app.use(session({
     resave: false,
 }));
 
+initPassport();
+app.use(passport.initialize());     
 
 app.get('/',(req,res)=>{
     res.setHeader('Content-Type','text/plain');
