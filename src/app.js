@@ -12,6 +12,7 @@ import { auth } from './middlewares/auth.js';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import { initPassport } from './config/passport.config.js';
+import CategoriesRouter from './routes/categories.routes.js';
 
 const PORT=config.general.PORT;
 
@@ -44,6 +45,7 @@ app.get('/',(req,res)=>{
 app.use("/api/events",eventsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/categories', CategoriesRouter);
 
 app.get('/test', auth,(req,res)=>{
     res.setHeader('Content-Type','application/json');
