@@ -1,15 +1,13 @@
-import mongoose from "mongoose"
-export const connDB=async(mongoUri, dbName)=>{
-    try {
-        await mongoose.connect(
-            mongoUri, 
-            {
-                dbName,
-            }
-        )
+import mongoose from 'mongoose';
 
-        console.log(`DB ${dbName} online...!!!`)
-    } catch (error) {
-        console.log(`Error al conectar a DB: ${error.message}`)
-    }
-}
+export const connDB = async (
+  mongoUri = process.env.MONGO_URL, 
+  dbName = process.env.DB_NAME
+) => {
+  try {
+    await mongoose.connect(mongoUri, { dbName });
+    console.log(`DB ${dbName} online...!!!`);
+  } catch (error) {
+    console.log(`Error al conectar a DB: ${error.message}`);
+  }
+};

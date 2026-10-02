@@ -1,12 +1,32 @@
+{{!-- src/views/layouts/main.handlebars --}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>{{title}} | Ringo Box Gym</title>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    {{{body}}}
+    <header class="navbar">
+        
+        <a class="brand" href="/">Ringo Box Gym</a>
+
+        <nav class="nav-links">
+            <a href="/" class="{{#if (eq page 'home')}}active{{/if}}">Inicio</a>
+        </nav>
+
+        <div class="nav-user">
+            <span>{{user.first_name}}</span>
+            <span class="badge badge-{{user.role}}">{{user.role}}</span>
+            <button id="btnLogout" class="btn btn-outline btn-sm">Salir</button>
+        </div>
+    </header>
+
+    <main class="page">
+        {{{body}}}
+    </main>
+
+    <script src="/js/layout.js"></script>
 </body>
 </html>

@@ -8,11 +8,12 @@ import usersRouter from './routes/users.routes.js'
 import session from 'express-session';
 import {engine} from 'express-handlebars';
 import path from 'path';
-import { auth } from './middlewares/auth.js';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
 import { initPassport } from './config/passport.config.js';
 import CategoriesRouter from './routes/categories.routes.js';
+import viewsRouter from './routes/views.routes.js';
+import ticketsRouter from './routes/tickets.routes.js';
 
 const PORT=config.general.PORT;
 
@@ -21,7 +22,7 @@ const app = express();
 // Middlewares
 app.use(express.static(path.join(import.meta.dirname, '../public')));
 
-app.engine('handlebars', engine());
+app.engine('handlebars', engine({ helpers: { eq: (a, b) => a === b } }));
 app.set('view engine', 'handlebars');
 app.set('views', path.join(import.meta.dirname, 'views'));
 
@@ -38,22 +39,14 @@ app.use(session({
 initPassport();
 app.use(passport.initialize());     
 
-app.get('/',(req,res)=>{
-    res.setHeader('Content-Type','text/plain');
-    res.status(200).send('OK');
-})
+app.use('/', viewsRouter);
 app.use("/api/events",eventsRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/tickets', ticketsRouter);
 app.use('/api/categories', CategoriesRouter);
-
-app.get('/test', auth,(req,res)=>{
-    res.setHeader('Content-Type','application/json');
-    res.status(200).json({payload:"test OK...!!!", user:req.user.first_name});
-})
 
 app.use(errorHandler)
 
-connDB(config.database.MONGO_URL, config.database.DB_NAME)
 
 export default app;

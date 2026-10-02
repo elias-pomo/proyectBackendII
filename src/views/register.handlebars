@@ -1,0 +1,34 @@
+<h1>Crear cuenta</h1>
+<p>Registrate para anotarte a las clases.</p>
+
+<div id="message" class="alert"></div>
+
+<form id="registerForm" novalidate>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="first_name">Nombre</label>
+            <input type="text" id="first_name" name="first_name" autocomplete="given-name" required>
+        </div>
+        <div class="form-group">
+            <label for="last_name">Apellido</label>
+            <input type="text" id="last_name" name="last_name" autocomplete="family-name" required>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" autocomplete="email" required>
+    </div>
+    <div class="form-group">
+        <label for="password">Contraseña (mínimo 6 caracteres)</label>
+        <input type="password" id="password" name="password" autocomplete="new-password" required>
+    </div>
+    <div class="form-group">
+        <label for="confirm">Repetir contraseña</label>
+        <input type="password" id="confirm" name="confirm" autocomplete="new-password" required>
+    </div>
+    <button type="submit" class="btn btn-block">Crear cuenta</button>
+</form>
+
+<p class="auth-footer">¿Ya tenés cuenta? <a href="/login">Iniciá sesión</a></p>
+
+<script src="/js/register.js"></script>
