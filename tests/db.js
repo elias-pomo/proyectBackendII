@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import { userModel } from '../src/dao/models/user.model.js';
 import { categoryModel } from '../src/dao/models/category.model.js';
 import { eventModel } from '../src/dao/models/event.model.js';
+import { ticketModel } from '../src/dao/models/ticket.model.js';
 
 export const connectTestDb = async () => {
     if (mongoose.connection.readyState === 0) {
@@ -11,9 +12,17 @@ export const connectTestDb = async () => {
     } else {
         await mongoose.connection.asPromise();   // app.js ya empezó a conectarse al importarse
     }
+    // Espera a que terminen de construirse los índices: los tests de concurrencia insertan enseguida
+    await Promise.all(Object.values(mongoose.models).map((model) => model.init()));
 };
 
 export const disconnectTestDb = () => mongoose.disconnect();
+
+// Las transacciones solo existen en un replica set (Atlas lo es) o en un cluster shardeado
+export const supportsTransactions = async () => {
+    const info = await mongoose.connection.db.admin().command({ hello: 1 });
+    return Boolean(info.setName) || info.msg === 'isdbgrid';
+};
 
 // Seguridad: se niega a borrar nada si la base conectada no es una base de test
 const assertTestDb = () => {
@@ -28,12 +37,17 @@ export const resetEvents = async () => {
     await eventModel.deleteMany({});
 };
 
+export const resetTickets = async () => {
+    assertTestDb();
+    await ticketModel.deleteMany({});
+};
+
 export const resetDb = async () => {
     assertTestDb();
     await Promise.all([
         userModel.deleteMany({}),
         categoryModel.deleteMany({}),
-        eventModel.deleteMany({})
-        // cuando haya tickets: ticketModel.deleteMany({})
+        eventModel.deleteMany({}),
+        ticketModel.deleteMany({})
     ]);
 };

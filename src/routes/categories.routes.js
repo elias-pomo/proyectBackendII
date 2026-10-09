@@ -10,5 +10,6 @@ const categoriesController = new CategoriesController(new CategoriesDAO());
 router.use(auth);
 router.get('/', categoriesController.getCategories);
 router.post('/', authorizeRoles('admin'), categoriesController.createCategory);
+router.patch('/:id', authorizeRoles('admin'), categoriesController.updateCategory);
 
 export default router;

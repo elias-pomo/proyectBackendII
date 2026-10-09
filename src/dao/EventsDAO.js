@@ -7,7 +7,7 @@ export class EventsDAO {
             .sort({ [sortField]: sortDir, _id: 1 })   // _id desempata y mantiene estable la paginación
             .skip((page - 1) * limit)
             .limit(limit)
-            .populate('category', 'name color')
+            .populate('category', 'name color maxQuantityPerTicket')
             .populate('organizer', 'first_name last_name')
             .lean(),
         eventModel.countDocuments(filter)
@@ -17,7 +17,7 @@ export class EventsDAO {
 
 async getByIdPopulated(id) {
     return await eventModel.findById(id)
-        .populate('category', 'name color')
+        .populate('category', 'name color maxQuantityPerTicket')
         .populate('organizer', 'first_name last_name')
         .lean();
 }
@@ -28,8 +28,17 @@ async getByIdPopulated(id) {
         const newEvent = await eventModel.create(event);
         return newEvent.toJSON();
     }
-    
+
     async update(id, data) {
         return await eventModel.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
     }
+
+async lockForBooking(id, session) {
+    return await eventModel.findOneAndUpdate(
+        { _id: id },
+        { $inc: { bookingVersion: 1 } },
+        { new: true, session, timestamps: false }   // timestamps: false para no tocar updatedAt
+    ).lean();
+}
+
 }

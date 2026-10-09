@@ -10,6 +10,7 @@ const EventsSchema = new mongoose.Schema(
         description: { type: String, required: [true, 'La descripción es obligatoria'], trim: true, minLength: [10, 'La descripción debe tener al menos 10 caracteres'] },
         category: { type: mongoose.Schema.Types.ObjectId, ref: 'categories', required: [true, 'La categoría es obligatoria'] },
         date: { type: Date, required: [true, 'La fecha es obligatoria'] },
+        bookingVersion: { type: Number, default: 0, select: false },
         endDate: {
             type: Date,
             required: [true, 'La fecha de fin es obligatoria'],

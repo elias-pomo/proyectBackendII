@@ -49,4 +49,39 @@ export class TicketsDAO {
             { new: true, runValidators: true }
         ).lean();
     }
+    async getByIdWithRefs(id) {
+    return await ticketModel.findById(id)
+        .populate('user', 'first_name email')
+        .populate('event', 'title date location')
+        .lean();
+}
+async create(data, session) {
+    const [ticket] = await ticketModel.create([data], { session });   // con sesión, create exige un arreglo
+    return ticket.toJSON();
+}
+
+async findActiveByUserAndEvent(userId, eventId, session) {
+    return await ticketModel.findOne(
+        { user: userId, event: eventId, status: { $in: ACTIVE_TICKET_STATUSES } },
+        null,
+        { session }
+    ).lean();
+}
+
+async countActiveSeats(eventId, session) {
+    const [result] = await ticketModel.aggregate([
+        { $match: { event: new mongoose.Types.ObjectId(String(eventId)), status: { $in: ACTIVE_TICKET_STATUSES } } },
+        { $group: { _id: null, total: { $sum: '$quantity' } } }
+    ], { session });
+    return result?.total ?? 0;
+}
+
+// Atómico: solo cancela si sigue activo. Devuelve null si otro pedido lo canceló primero
+async cancel(id) {
+    return await ticketModel.findOneAndUpdate(
+        { _id: id, status: { $in: ACTIVE_TICKET_STATUSES } },
+        { status: 'cancelled', cancelledAt: new Date() },
+        { new: true, runValidators: true }
+    ).lean();
+}
 }

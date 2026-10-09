@@ -8,6 +8,11 @@ process.env.NODE_ENV = 'test';                // en test la cookie no es "secure
 process.env.SECRET ||= 'secreto-solo-para-tests';
 process.env.JWT_EXPIRES_IN ||= '1h';
 
+// Los tests nunca mandan emails reales: sin MAIL_* el MailService solo avisa por consola
+['MAIL_HOST', 'MAIL_PORT', 'MAIL_USER', 'MAIL_PASS', 'MAIL_FROM'].forEach((key) => {
+    process.env[key] = '';
+});
+
 // Los tests usan otra base: <DB_NAME>_test. Nunca tocan la base de desarrollo.
 const baseName = process.env.DB_NAME || 'ringo_box_gym';
 process.env.DB_NAME = baseName.endsWith('_test') ? baseName : `${baseName}_test`;

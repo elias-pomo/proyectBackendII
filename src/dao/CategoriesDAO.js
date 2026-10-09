@@ -17,4 +17,8 @@ export class CategoriesDAO {
         .collation({ locale: 'es', strength: 2 })   // ignora mayúsculas: "boxeo" = "Boxeo"
         .lean();
 }
+async update(id, data) {
+    return await categoryModel.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+}
+
 }

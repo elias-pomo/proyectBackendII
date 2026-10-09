@@ -17,7 +17,7 @@ export const router = Router();
 const eventsDAO = new EventsDAO();
 const eventsController = new EventsController(new EventsService(eventsDAO, new CategoriesDAO()));
 const ticketsController = new TicketsController(
-    new TicketsService(new TicketsDAO(), eventsDAO, new MailService())
+    new TicketsService(new TicketsDAO(), new EventsDAO(), new MailService(), new CategoriesDAO())
 );
 
 router.get('/', optionalAuth, eventsController.getEvents);

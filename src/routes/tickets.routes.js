@@ -5,12 +5,12 @@ import { TicketsService } from '../services/tickets.service.js';
 import { MailService } from '../services/mail.service.js';
 import { TicketsDAO } from '../dao/TicketsDAO.js';
 import { EventsDAO } from '../dao/EventsDAO.js';
+import { CategoriesDAO } from '../dao/CategoriesDAO.js';
 import { auth } from '../middlewares/auth.js';
 
 const router = Router();
 const ticketsController = new TicketsController(
-    new TicketsService(new TicketsDAO(), new EventsDAO(), new MailService())
-);
+    new TicketsService(new TicketsDAO(), new EventsDAO(), new MailService(), new CategoriesDAO()));
 
 router.use(auth);
 
