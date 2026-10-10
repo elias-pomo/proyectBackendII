@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
+import { logger } from '../utils/logger.js';
 
 export const connDB = async (
-  mongoUri = process.env.MONGO_URL, 
-  dbName = process.env.DB_NAME
+    mongoUri = process.env.MONGO_URL,
+    dbName = process.env.DB_NAME
 ) => {
-  try {
     await mongoose.connect(mongoUri, { dbName });
-    console.log(`DB ${dbName} online...!!!`);
-  } catch (error) {
-    console.log(`Error al conectar a DB: ${error.message}`);
-  }
+    logger.info(`DB ${dbName} online`);
 };

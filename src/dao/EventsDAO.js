@@ -1,44 +1,53 @@
-import { eventModel } from "./models/event.model.js";
+import { eventModel } from './models/event.model.js';
+
+const CATEGORY_FIELDS = 'name color maxQuantityPerTicket';
+const ORGANIZER_FIELDS = 'first_name last_name';
 
 export class EventsDAO {
     async paginate(filter, { sortField, sortDir, page, limit }) {
-    const [data, total] = await Promise.all([
-        eventModel.find(filter)
-            .sort({ [sortField]: sortDir, _id: 1 })   // _id desempata y mantiene estable la paginación
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .populate('category', 'name color maxQuantityPerTicket')
-            .populate('organizer', 'first_name last_name')
-            .lean(),
-        eventModel.countDocuments(filter)
-    ]);
-    return { data, total };
-}
+        const [data, total] = await Promise.all([
+            eventModel.find(filter)
+                .sort({ [sortField]: sortDir, _id: 1 })   // _id desempata y mantiene estable la paginación
+                .skip((page - 1) * limit)
+                .limit(limit)
+                .populate('category', CATEGORY_FIELDS)
+                .populate('organizer', ORGANIZER_FIELDS)
+                .lean(),
+            eventModel.countDocuments(filter)
+        ]);
+        return { data, total };
+    }
 
-async getByIdPopulated(id) {
-    return await eventModel.findById(id)
-        .populate('category', 'name color maxQuantityPerTicket')
-        .populate('organizer', 'first_name last_name')
-        .lean();
-}
-    async getById(id) {
+    async findByIdPopulated(id) {
+        return await eventModel.findById(id)
+            .populate('category', CATEGORY_FIELDS)
+            .populate('organizer', ORGANIZER_FIELDS)
+            .lean();
+    }
+
+    async findById(id) {
         return await eventModel.findById(id).lean();
     }
-    async create(event = {}) {
-        const newEvent = await eventModel.create(event);
-        return newEvent.toJSON();
+
+    async create(data) {
+        const event = await eventModel.create(data);
+        return event.toJSON();
     }
 
     async update(id, data) {
-        return await eventModel.findByIdAndUpdate(id, data, { new: true, runValidators: true }).lean();
+        return await eventModel.findByIdAndUpdate(id, data, { returnDocument: 'after', runValidators: true }).lean();
     }
 
-async lockForBooking(id, session) {
-    return await eventModel.findOneAndUpdate(
-        { _id: id },
-        { $inc: { bookingVersion: 1 } },
-        { new: true, session, timestamps: false }   // timestamps: false para no tocar updatedAt
-    ).lean();
-}
+    async count(filter = {}) {
+        return await eventModel.countDocuments(filter);
+    }
 
+    // Candado de reserva: incrementa bookingVersion para serializar las inscripciones concurrentes
+    async lockForBooking(id, session) {
+        return await eventModel.findOneAndUpdate(
+            { _id: id },
+            { $inc: { bookingVersion: 1 } },
+            { returnDocument: 'after', session, timestamps: false }   // timestamps: false para no tocar updatedAt
+        ).lean();
+    }
 }

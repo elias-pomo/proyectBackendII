@@ -1,6 +1,7 @@
 // src/services/mail.service.js
 import nodemailer from 'nodemailer';
 import { config } from '../config/config.js';
+import { logger } from '../utils/logger.js';
 
 const TZ = 'America/Argentina/Buenos_Aires';
 
@@ -53,14 +54,13 @@ export class MailService {
         return this.#transporter;
     }
 
-    async #send({ to, subject, text, html, label }) {
-        if (!this.isConfigured()) {
-            console.warn('Email no enviado: faltan variables MAIL_* en el .env');
-            return;
-        }
-        await this.#getTransporter().sendMail({ from: config.mail.FROM, to, subject, text, html });
-        console.log(`${label} enviado a ${to}`);
+    async #send({ to, subject, text, html }) {
+    if (!this.isConfigured()) {
+        logger.warn('Email no enviado: faltan variables MAIL_* en el .env');
+        return;
     }
+    await this.#getTransporter().sendMail({ from: config.mail.FROM, to, subject, text, html });
+}
 
     async sendTicketConfirmation({ to, name, event, ticket }) {
         const when = formatDateTime(event.date);

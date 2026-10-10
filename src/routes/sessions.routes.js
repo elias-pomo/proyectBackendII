@@ -1,41 +1,15 @@
 import { Router } from 'express';
-import SessionsController from '../controllers/sessions.controller.js';
+import { SessionsController } from '../controllers/sessions.controller.js';
+import { sessionsService } from '../container.js';
 import { auth } from '../middlewares/auth.js';
-import passport from 'passport';
-import { authorizeRoles } from '../middlewares/authorize.js';
+import { localAuth } from '../middlewares/localAuth.js';
 
 const router = Router();
-const sessionsController = new SessionsController();
+const sessionsController = new SessionsController(sessionsService);
 
-// Rutas de sesión
-router.post('/register', (req, res, next) => {
-    passport.authenticate('register', { session: false }, (err, user, info) => {
-        if (err) return next(err);
-        
-        if (!user) {
-            const statusCode = info.status ? info.status : 400; 
-            return res.status(statusCode).json({ error: info.message });
-        }
-        req.user = user;
-        next();
-    })(req, res, next);
-}, sessionsController.register);
+router.post('/register', localAuth('register', 400), sessionsController.register);
+router.post('/login', localAuth('login', 401), sessionsController.login);
 
-router.post('/login', (req, res, next) => {
-    passport.authenticate('login', { session: false }, (err, user, info) => {
-        if (err) return next(err);
-        if (!user) {
-            return res.status(401).json({
-                status: 'error',
-                message: info?.message || 'Credenciales invalidas'
-            });
-        }
-        req.user = user;
-        next();
-    })(req, res, next);
-}, sessionsController.login);
-
-// Ruta protegida 
 router.post('/logout', auth, sessionsController.logout);
 router.get('/current', auth, sessionsController.currentUser);
 

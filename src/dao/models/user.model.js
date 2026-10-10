@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { USER_ROLES } from '../../constants/statuses.js';
+
 
 const userCollection = 'users';
 
@@ -29,7 +31,7 @@ const userSchema = new mongoose.Schema({
     },
     role:{
         type: String,
-        enum: ["admin", "organizer", "user"],
+        enum: USER_ROLES,
         default: "user"
     },
 },

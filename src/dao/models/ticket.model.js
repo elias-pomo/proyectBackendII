@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
+import { TICKET_STATUSES } from '../../constants/statuses.js';
 
-export const TICKET_STATUSES = ['confirmed', 'pending', 'cancelled'];
-export const ACTIVE_TICKET_STATUSES = ['confirmed', 'pending'];   // los únicos que ocupan cupo
 
 const ticketSchema = new mongoose.Schema(
     {

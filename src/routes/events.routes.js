@@ -1,24 +1,15 @@
-// src/routes/events.routes.js
 import { Router } from 'express';
 import { EventsController } from '../controllers/events.controller.js';
 import { TicketsController } from '../controllers/tickets.controller.js';
-import { EventsDAO } from '../dao/EventsDAO.js';
-import { CategoriesDAO } from '../dao/CategoriesDAO.js';
-import { TicketsDAO } from '../dao/TicketsDAO.js';
+import { eventsService, ticketsService } from '../container.js';
 import { auth } from '../middlewares/auth.js';
 import { authorizeRoles } from '../middlewares/authorize.js';
 import { optionalAuth } from '../middlewares/authOptional.js';
-import { EventsService } from '../services/events.service.js';
-import { TicketsService } from '../services/tickets.service.js';
-import { MailService } from '../services/mail.service.js';
 
 export const router = Router();
 
-const eventsDAO = new EventsDAO();
-const eventsController = new EventsController(new EventsService(eventsDAO, new CategoriesDAO()));
-const ticketsController = new TicketsController(
-    new TicketsService(new TicketsDAO(), new EventsDAO(), new MailService(), new CategoriesDAO())
-);
+const eventsController = new EventsController(eventsService);
+const ticketsController = new TicketsController(ticketsService);
 
 router.get('/', optionalAuth, eventsController.getEvents);
 router.get('/:id', optionalAuth, eventsController.getEventsById);

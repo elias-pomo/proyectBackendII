@@ -1,16 +1,10 @@
-// src/routes/tickets.routes.js
 import { Router } from 'express';
 import { TicketsController } from '../controllers/tickets.controller.js';
-import { TicketsService } from '../services/tickets.service.js';
-import { MailService } from '../services/mail.service.js';
-import { TicketsDAO } from '../dao/TicketsDAO.js';
-import { EventsDAO } from '../dao/EventsDAO.js';
-import { CategoriesDAO } from '../dao/CategoriesDAO.js';
+import { ticketsService } from '../container.js';
 import { auth } from '../middlewares/auth.js';
 
 const router = Router();
-const ticketsController = new TicketsController(
-    new TicketsService(new TicketsDAO(), new EventsDAO(), new MailService(), new CategoriesDAO()));
+const ticketsController = new TicketsController(ticketsService);
 
 router.use(auth);
 

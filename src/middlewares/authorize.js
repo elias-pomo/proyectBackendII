@@ -1,18 +1,9 @@
-export const authorizeRoles = (...allowedRoles) => {
+import { AppError } from '../utils/AppError.js';
 
-    return(req, res, next) =>{
-        if(!req.user){
-            return res.status(401).json({
-                status: 'error',
-                message: 'No autorizado'
-            })
-        }
-        if(!allowedRoles.includes(req.user.role)){
-            return res.status(403).json({
-                status: 'error',
-                message: 'No tenes permisos para realizar esta accion'
-            })
-        }
-        next();
+export const authorizeRoles = (...allowedRoles) => (req, res, next) => {
+    if (!req.user) return next(new AppError('No autorizado', 401));
+    if (!allowedRoles.includes(req.user.role)) {
+        return next(new AppError('No tenes permisos para realizar esta accion', 403));
     }
-}
+    next();
+};

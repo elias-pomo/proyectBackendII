@@ -1,4 +1,6 @@
 // src/controllers/events.controller.js
+import { toEventDTO } from '../dto/event.dto.js';
+
 export class EventsController {
     constructor(eventsService) {
         this.eventsService = eventsService;
@@ -6,8 +8,8 @@ export class EventsController {
 
     getEvents = async (req, res, next) => {
         try {
-            const result = await this.eventsService.getEvents(req.query, req.user);
-            return res.status(200).json({ status: 'success', ...result });
+            const { data, ...pagination } = await this.eventsService.getEvents(req.query, req.user);
+            return res.status(200).json({ status: 'success', data: data.map(toEventDTO), ...pagination });
         } catch (error) {
             next(error);
         }
@@ -16,7 +18,7 @@ export class EventsController {
     getEventsById = async (req, res, next) => {
         try {
             const event = await this.eventsService.getEventById(req.params.id, req.user);
-            return res.status(200).json({ status: 'success', payload: event });
+            return res.status(200).json({ status: 'success', payload: toEventDTO(event) });
         } catch (error) {
             next(error);
         }
@@ -25,7 +27,7 @@ export class EventsController {
     createEvent = async (req, res, next) => {
         try {
             const event = await this.eventsService.createEvent(req.body, req.user);
-            return res.status(201).json({ status: 'success', payload: event });
+            return res.status(201).json({ status: 'success', payload: toEventDTO(event) });
         } catch (error) {
             next(error);
         }
@@ -34,7 +36,7 @@ export class EventsController {
     updateEvent = async (req, res, next) => {
         try {
             const event = await this.eventsService.updateEvent(req.params.id, req.body, req.user);
-            return res.status(200).json({ status: 'success', payload: event });
+            return res.status(200).json({ status: 'success', payload: toEventDTO(event) });
         } catch (error) {
             next(error);
         }
@@ -43,7 +45,7 @@ export class EventsController {
     updateEventStatus = async (req, res, next) => {
         try {
             const event = await this.eventsService.changeStatus(req.params.id, req.body?.status, req.user);
-            return res.status(200).json({ status: 'success', payload: event });
+            return res.status(200).json({ status: 'success', payload: toEventDTO(event) });
         } catch (error) {
             next(error);
         }

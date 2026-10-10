@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { logger } from './logger.js';
 
 let warned = false;
 
@@ -16,7 +17,7 @@ export const runInTransaction = async (work) => {
 
         if (!warned) {
             warned = true;
-            console.warn('MongoDB sin replica set: no hay transacciones. Se ejecuta sin ellas y los cupos no quedan protegidos ante pedidos simultáneos.');
+            logger.warn('MongoDB sin replica set: no hay transacciones. Se ejecuta sin ellas y los cupos no quedan protegidos ante pedidos simultáneos.');
         }
         return await work(undefined);
     }

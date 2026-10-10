@@ -1,13 +1,27 @@
-export default class UsersRepository {
+// src/repositories/UserRepository.js
+export class UserRepository {
     constructor(dao) {
         this.dao = dao;
     }
 
-    async getUserByEmail(email) {
+    // Incluye password: usar solo para validar credenciales
+    async findByEmail(email) {
         return await this.dao.findByEmail(email);
     }
 
-    async createUser(userData) {
-        return await this.dao.save(userData);
+    async findById(id) {
+        return await this.dao.findById(id);
+    }
+
+    async findAll() {
+        return await this.dao.findAll();
+    }
+
+    async create(userData) {
+        return await this.dao.create(userData);
+    }
+
+    async updateRole(id, role) {
+        return await this.dao.update(id, { role });
     }
 }

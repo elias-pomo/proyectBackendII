@@ -2,7 +2,8 @@
 // Disparan pedidos simultáneos contra la API para comprobar que el cupo y los duplicados
 // quedan protegidos por la transacción. Requieren un replica set (Atlas lo es).
 import { expect } from 'chai';
-import { ticketModel, ACTIVE_TICKET_STATUSES } from '../src/dao/models/ticket.model.js';
+import { ticketModel } from '../src/dao/models/ticket.model.js';
+import { ACTIVE_TICKET_STATUSES } from '../src/constants/statuses.js';
 import { resetDb, resetEvents, resetTickets, supportsTransactions } from './db.js';
 import { api, createUser, createCategory, createEvent } from './helpers.js';
 
@@ -29,7 +30,6 @@ describe('Tickets: inscripciones concurrentes', function () {
 
     before(async function () {
         if (!(await supportsTransactions())) {
-            console.warn('      (se omiten: la base no es un replica set, así que no hay transacciones)');
             this.skip();
         }
         await resetDb();

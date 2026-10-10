@@ -1,11 +1,10 @@
-// src/services/events.service.js
 import { AppError } from '../utils/AppError.js';
-import { EVENT_STATUSES } from '../dao/models/event.model.js';
+import { EVENT_STATUSES } from '../constants/statuses.js';
 
 const SORTABLE_FIELDS = ['date', 'price', 'capacity', 'title', 'createdAt'];
 const DEFAULT_LIMIT = 10;
 const MAX_LIMIT = 50;
-const TZ_OFFSET = '-03:00'; 
+const TZ_OFFSET = '-03:00';
 const EDITABLE_FIELDS = ['code', 'title', 'description', 'price', 'capacity', 'category', 'date', 'endDate', 'location'];
 
 const ALLOWED_TRANSITIONS = {
@@ -64,10 +63,10 @@ const visibilityFilter = (user) => {
 };
 
 export class EventsService {
-    constructor(eventsDAO, categoriesDAO) {
-        this.eventsDAO = eventsDAO;
-        this.categoriesDAO = categoriesDAO;
-    }
+    constructor(eventRepository, categoryRepository) {
+    this.eventRepository = eventRepository;
+    this.categoryRepository = categoryRepository;
+}
 
     async getEvents(query = {}, user = null) {
         const { status, category, location, dateFrom, dateTo, sort = 'date' } = query;
@@ -91,9 +90,9 @@ export class EventsService {
         }
 
         if (category !== undefined) {
-            const categoryFound = typeof category === 'string' ? await this.categoriesDAO.getByName(category.trim()) : null;
+            const categoryFound = typeof category === 'string' ? await this.categoryRepository.findByName(category.trim()) : null;
             if (!categoryFound) {
-                return { data: [], page, limit, total: 0, totalPages: 0 };  
+                return { data: [], page, limit, total: 0, totalPages: 0 };
             }
             filter.category = categoryFound._id;
         }
@@ -109,7 +108,7 @@ export class EventsService {
             if (dateTo !== undefined) filter.date.$lte = parseDate(dateTo, 'dateTo', { endOfDay: true });
         }
 
-        const { data, total } = await this.eventsDAO.paginate(
+        const { data, total } = await this.eventRepository.findPaginated(
             { $and: [filter, visibilityFilter(user)] },
             { sortField, sortDir, page, limit }
         );
@@ -118,7 +117,7 @@ export class EventsService {
     }
 
     async getEventById(id, user = null) {
-        const event = await this.eventsDAO.getByIdPopulated(id); 
+        const event = await this.eventRepository.findByIdWithRelations(id);
 
         const visible = event && (event.status !== 'draft' || user?.role === 'admin' || isOwner(user, event));
         if (!visible) throw new AppError('Evento no encontrado', 404);
@@ -128,14 +127,14 @@ export class EventsService {
 
     async resolveCategory(name) {
     if (typeof name !== 'string' || !name.trim()) throw new AppError('La categoría es obligatoria', 400);
-    const category = await this.categoriesDAO.getByName(name.trim());
+    const category = await this.categoryRepository.findByName(name.trim());
     if (!category) throw new AppError('Categoría inexistente', 400);
     return category;
 }
 
 // 404 si no existe, 403 si no es el dueño ni admin
 async findManageableEvent(id, user) {
-    const event = await this.eventsDAO.getById(id);   // id mal formado: CastError (400)
+    const event = await this.eventRepository.findById(id);   // id mal formado: CastError (400)
     if (!event) throw new AppError('Evento no encontrado', 404);
     if (user.role !== 'admin' && !isOwner(user, event)) {
         throw new AppError('No tenés permisos para modificar este evento', 403);
@@ -159,7 +158,7 @@ async createEvent(body, user) {
     const eventPrice = price === undefined ? 0 : parsePrice(price);
     const categoryFound = await this.resolveCategory(category);
 
-    return await this.eventsDAO.create({
+    return await this.eventRepository.create({
         code: typeof code === 'string' && code.trim() ? code.trim() : `CLS-${Date.now().toString(36).toUpperCase()}`,
         title, description, location, status,
         price: eventPrice,
@@ -207,7 +206,7 @@ async updateEvent(id, body, user) {
     const finalEnd = data.endDate ?? event.endDate;
     if (finalEnd <= finalDate) throw new AppError('endDate debe ser posterior a date', 400);
 
-    return await this.eventsDAO.update(id, data);
+    return await this.eventRepository.update(id, data);
 }
 
 async changeStatus(id, status, user) {
@@ -230,7 +229,7 @@ async changeStatus(id, status, user) {
         throw new AppError('No se puede publicar un evento cuya fecha ya pasó', 409);
     }
 
-    return await this.eventsDAO.update(id, { status });
+    return await this.eventRepository.update(id, { status });
 }
 
 }

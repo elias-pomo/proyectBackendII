@@ -1,7 +1,7 @@
 // src/dao/models/event.model.js
 import mongoose from "mongoose";
+import { EVENT_STATUSES } from '../../constants/statuses.js';
 
-export const EVENT_STATUSES = ['draft', 'published', 'cancelled', 'finished'];
 
 const EventsSchema = new mongoose.Schema(
     {

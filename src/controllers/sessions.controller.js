@@ -1,83 +1,37 @@
-import { config } from '../config/config.js';
-import jwt from 'jsonwebtoken';
-import { generateToken } from '../utils/jwt.js';
+import { toCurrentUserDTO, toLoginUserDTO, toRegisteredUserDTO } from '../dto/user.dto.js';
 
+const cookieOptions = () => ({
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+});
 
-
-export default class SessionsController {
-    register = async (req, res) => {
-        try {
-            res.status(201).json({
-                status: "success",
-                payload:{
-                    name: req.user.first_name,
-                    email: req.user.email,
-                    role: req.user.role
-                }
-            });
-        } catch (error) {
-            res.status(error.status || 500).json({
-                status: "error",
-                message: error.message || "Error interno del servidor"
-            });
-        }
-    }
-    login = async (req, res) => {
-        try {
-            const user = {
-                _id: req.user._id,
-                name: req.user.first_name,
-                email: req.user.email,
-                role: req.user.role 
-            }
-
-            let token = generateToken(user);
-
-            res.cookie("currentUser", token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict'
-            })
-            res.setHeader('Content-Type','application/json')
-
-            res.status(200).json({
-                status:"success", 
-                message:"Login exitoso", 
-                user});
-        } catch (error) {
-            console.error(error);
-            res.status(error.status || 500).json({
-                status: "error",
-                message: error.message || "Error interno del servidor"
-            });
-        }
+export class SessionsController {
+    constructor(sessionsService) {
+        this.sessionsService = sessionsService;
     }
 
-    logout = async (req, res) =>{
-        try {
-            res.clearCookie('currentUser',{ httpOnly: true,secure: process.env.NODE_ENV === 'production', sameSite: 'strict' });
-            res.status(200).json({
-                status:"success",
-                message:"Logout exitoso",
-            });
-        } catch (error) {
-            res.status(error.status || 500).json({
-                status: "error",
-                message: error.message || "Error interno del servidor"
-            });
-        }
+    // req.user lo deja el middleware localAuth, ya registrado
+    register = (req, res) => {
+        return res.status(201).json({ status: 'success', payload: toRegisteredUserDTO(req.user) });
     }
 
-    currentUser = async (req, res) => {
-    res.status(200).json({
-        status: 'success',
-        payload:{
-            _id: req.user._id,
-            email: req.user.email,
-            role: req.user.role
-            }
-        }
-    )  
-}
+    login = (req, res) => {
+        const token = this.sessionsService.createToken(req.user);
+        res.cookie('currentUser', token, cookieOptions());
+        return res.status(200).json({
+            status: 'success',
+            message: 'Login exitoso',
+            user: toLoginUserDTO(req.user)
+        });
+    }
 
+    logout = (req, res) => {
+        res.clearCookie('currentUser', cookieOptions());
+        return res.status(200).json({ status: 'success', message: 'Logout exitoso' });
+    }
+
+    currentUser = (req, res) => {
+        return res.status(200).json({ status: 'success', payload: toCurrentUserDTO(req.user) });
+    }
 }
