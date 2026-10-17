@@ -2,7 +2,7 @@
 import { expect } from 'chai';
 import mongoose from 'mongoose';
 import { eventModel } from '../../src/models/event.model.js';
-import { resetEvents } from './db.js';
+import { resetEvents, resetTickets } from './db.js';
 import { api, createUser, createCategory, createEvent, eventPayload, DAY, HOUR } from './helpers.js';
 
 const randomId = () => new mongoose.Types.ObjectId().toString();
@@ -446,6 +446,46 @@ describe('Eventos', () => {
         it('PATCH status sobre un evento inexistente da 404', async () => {
             const res = await patchStatus(organizer, randomId(), 'cancelled');
             expect(res.status).to.equal(404);
+        });
+    });
+
+    // ---------------------------------------------------------------------------------------
+    describe('Lugares disponibles: available en listado y detalle', () => {
+        let event, other;
+        const seatsInList = async (id) => {
+            const res = await list({ limit: 50 });
+            const found = res.body.data.find((e) => e._id === String(id));
+            return { taken: found.taken, available: found.available };
+        };
+        const seatsInDetail = async (id) => {
+            const { payload } = (await api('get', `/api/events/${id}`)).body;
+            return { taken: payload.taken, available: payload.available };
+        };
+
+        beforeEach(async () => {
+            await Promise.all([resetEvents(), resetTickets()]);
+            event = await createEvent({ organizer, category: boxeo, capacity: 5 });
+            other = await createEvent({ organizer, category: karate, capacity: 8 });
+        });
+
+        it('sin inscripciones, available es igual al cupo', async () => {
+            expect(await seatsInList(event._id)).to.deep.equal({ taken: 0, available: 5 });
+            expect(await seatsInDetail(event._id)).to.deep.equal({ taken: 0, available: 5 });
+        });
+
+        it('baja al inscribirse y vuelve a subir al cancelar', async () => {
+            const booking = await api('post', `/api/events/${event._id}/tickets`, { user, body: { quantity: 2 } });
+            expect(booking.status).to.equal(201);
+
+            expect(await seatsInList(event._id)).to.deep.equal({ taken: 2, available: 3 });
+            expect(await seatsInDetail(event._id)).to.deep.equal({ taken: 2, available: 3 });
+            expect(await seatsInList(other._id)).to.deep.equal({ taken: 0, available: 8 });   // no se mezclan
+
+            const cancel = await api('patch', `/api/tickets/${booking.body.payload._id}/cancel`, { user });
+            expect(cancel.status).to.equal(200);
+
+            expect(await seatsInList(event._id)).to.deep.equal({ taken: 0, available: 5 });
+            expect(await seatsInDetail(event._id)).to.deep.equal({ taken: 0, available: 5 });
         });
     });
 });

@@ -1,44 +1,55 @@
-<section class="hero">
+<section class="container hero">
     <div>
-        <h1>Ringo Box <span>Gym</span></h1>
-        <p class="lead">Deportes de contacto con técnica, disciplina y respeto. Boxeo, karate, taekwondo y musculación, para todos los niveles.</p>
-        <a href="#proximas" class="btn">Ver próximas clases</a>
+        <div class="eyebrow">Club de deportes de contacto</div>
+        <h1 class="display display-xl">ENTRENÁ<br>CON MÉTODO.<br><span class="accent">PELEÁ</span> CON<br>CABEZA.</h1>
+        <p class="lead">Boxeo, kickboxing, MMA, taekwondo y funcional en grupos reducidos, con profes que corrigen cada golpe.</p>
+        <div class="hero-actions">
+            <a href="/clases" class="btn btn-lg">Reservá tu clase</a>
+            <a href="#como" class="link-underline">Cómo funciona</a>
+        </div>
+    </div>
+    <div class="hero-media">
+        <img class="hero-photo" src="/img/inicio1.jpg" alt="Boxeador en guardia sobre el ring, con guantes rojos" width="1671" height="941" fetchpriority="high">
+        <aside class="next-class" id="proximaClase" aria-live="polite">
+            <div class="row label"><span>Próxima clase</span></div>
+            <div class="skeleton" style="height: 72px; border: 0"></div>
+        </aside>
     </div>
 </section>
 
-<section class="section">
-    <h2>Nuestras disciplinas</h2>
-    <div id="disciplinas" class="grid grid-cards">
-        <p class="muted">Cargando…</p>
+<div class="container"><div class="ropes" aria-hidden="true"><span></span><span></span><span></span></div></div>
+
+<section class="container section" id="disciplinas">
+    <div class="split" style="margin-bottom: 64px">
+        <div>
+            <div class="eyebrow no-line">01 · Disciplinas</div>
+            <h2 class="display display-md" style="margin-top: 18px">ELEGÍ CÓMO<br>SUBIR AL RING</h2>
+        </div>
+        <p class="lead">Todas las clases son para todos los niveles y los cupos se reservan online.</p>
+    </div>
+    <div class="disciplines" id="disciplinasLista">
+        <div class="skeleton" style="height: 340px; border: 0"></div>
     </div>
 </section>
 
-<section class="section">
-    <h2>Cómo funciona</h2>
-    <div class="grid grid-steps">
-        <article class="card step-card">
-            <div class="step-number">1</div>
-            <h3>Elegí tu disciplina</h3>
-            <p>Mirá las clases disponibles y encontrá el horario que mejor se adapte a tu rutina.</p>
-        </article>
-        <article class="card step-card">
-            <div class="step-number">2</div>
-            <h3>Reservá tu lugar</h3>
-            <p>Inscribite a la clase y recibí tu ticket individual. Los cupos son limitados.</p>
-        </article>
-        <article class="card step-card">
-            <div class="step-number">3</div>
-            <h3>A entrenar</h3>
-            <p>Presentate en el horario y entrená con instructores que te acompañan en cada paso.</p>
-        </article>
+<section class="section section-alt" id="como">
+    <div class="container split" style="align-items: start">
+        <div>
+            <div class="eyebrow no-line">02 · Cómo funciona</div>
+            <h2 class="display display-md" style="margin-top: 18px">DE LA RESERVA<br>AL RING</h2>
+        </div>
+        <ol class="steps" style="list-style: none; margin: 0; padding: 0">
+            <li class="step"><span class="step-num">01</span><div><h3>Elegí tu clase</h3><p>Filtrá por disciplina, día o lugar en la cartelera.</p></div></li>
+            <li class="step"><span class="step-num">02</span><div><h3>Reservá tu lugar</h3><p>Te llega el código por mail. Si no llegás, cancelás y liberás el cupo.</p></div></li>
+            <li class="step"><span class="step-num">03</span><div><h3>A entrenar</h3><p>Llegá 10 minutos antes con vendas y agua. Los guantes los ponemos nosotros.</p></div></li>
+        </ol>
     </div>
 </section>
 
-<section id="proximas" class="section">
-    <h2>Próximas clases</h2>
-    <div id="proximasClases" class="class-list">
-        <p class="muted">Cargando…</p>
-    </div>
+<section class="container cta-final">
+    <div class="eyebrow no-line" style="justify-content: center">Tu primera clase</div>
+    <h2 class="display display-lg">EL RING TE ESTÁ <span class="accent">ESPERANDO</span></h2>
+    <a href="/clases" class="btn btn-lg">Ver clases</a>
 </section>
 
 <script type="module" src="/js/home.js"></script>

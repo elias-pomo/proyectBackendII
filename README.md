@@ -1,7 +1,7 @@
-# Ringo Box Gym · API de eventos e inscripciones
+# Box Club Tucumán · API de eventos e inscripciones
 
-API REST para la plataforma de clases de **Ringo Box Gym**, un gimnasio de deportes de combate.
-Los organizadores publican clases (eventos) de boxeo, kickboxing, funcional y sparring, y los
+API REST para la plataforma de clases de **Box Club Tucumán**, un club de deportes de contacto de San Miguel de Tucumán.
+Los organizadores publican clases (eventos) de boxeo, kickboxing, MMA, taekwondo y funcional, y los
 alumnos se inscriben reservando lugares (tickets). La API controla el cupo de cada clase, evita
 inscripciones duplicadas y envía un email de confirmación con el código de reserva.
 
@@ -19,6 +19,7 @@ en las respuestas).
 - [Roles y permisos](#roles-y-permisos)
 - [Flujo de autenticación](#flujo-de-autenticación)
 - [Flujo de inscripción](#flujo-de-inscripción)
+- [Front](#front)
 - [Endpoints](#endpoints)
 - [Ejemplos de uso](#ejemplos-de-uso)
 - [Arquitectura en capas](#arquitectura-en-capas)
@@ -35,7 +36,7 @@ en las respuestas).
 | Autenticación | Passport (`passport-local`, `passport-jwt`), jsonwebtoken, cookie-parser |
 | Contraseñas | bcrypt |
 | Emails | Nodemailer (SMTP) |
-| Vistas | express-handlebars (login, registro y calendario de clases) |
+| Front | express-handlebars + CSS y JavaScript vanilla (módulos ES), Google Fonts (Anton, Barlow Condensed, Barlow) |
 | Configuración | dotenv |
 | Tests | Mocha, Chai, Supertest |
 | Desarrollo | nodemon |
@@ -74,7 +75,7 @@ ninguna credencial está escrita en el código.
 | `MAIL_PORT` | No | `587` | `587` (STARTTLS) o `465` (TLS directo) |
 | `MAIL_USER` | No | `tucuenta@gmail.com` | Usuario SMTP |
 | `MAIL_PASS` | No | `xxxx xxxx xxxx xxxx` | Contraseña SMTP (en Gmail, una [contraseña de aplicación](https://myaccount.google.com/apppasswords)) |
-| `MAIL_FROM` | No | `Ringo Box Gym <tucuenta@gmail.com>` | Remitente de los emails |
+| `MAIL_FROM` | No | `Box Club Tucumán <tucuenta@gmail.com>` | Remitente de los emails |
 
 Si falta alguna `MAIL_*`, la API funciona igual pero no envía los emails de confirmación y
 cancelación (solo lo avisa en el log).
@@ -85,7 +86,7 @@ cancelación (solo lo avisa en el log).
 |---|---|
 | `npm run dev` | Levanta el servidor con nodemon (se reinicia al guardar) |
 | `npm start` | Levanta el servidor con node |
-| `npm run seed` | Carga usuarios de prueba, categorías y 13 clases publicadas. No duplica datos si se corre de nuevo |
+| `npm run seed` | Carga usuarios de prueba, las 5 disciplinas y la grilla de clases de las próximas semanas. No duplica datos si se corre de nuevo |
 | `npm test` | Corre los tests unitarios y después los de integración |
 | `npm run test:unit` | Solo tests unitarios (no necesitan base de datos) |
 | `npm run test:integration` | Solo tests de integración (necesitan `MONGO_URL`) |
@@ -97,14 +98,16 @@ cancelación (solo lo avisa en el log).
 | Rol | Email | Contraseña |
 |---|---|---|
 | `admin` | `admin@ringobox.test` | `Admin123!` |
-| `organizer` | `organizer@ringobox.test` | `Organizer123!` |
-| `organizer` | `organizer2@ringobox.test` | `Organizer123!` |
+| `organizer` (Lucía Ferreyra: boxeo, kickboxing y funcional) | `organizer@ringobox.test` | `Organizer123!` |
+| `organizer` (Martín Gómez: MMA y taekwondo) | `organizer2@ringobox.test` | `Organizer123!` |
 | `user` | `user@ringobox.test` | `User123!` |
 | `user` | `user2@ringobox.test` | `User123!` |
 
-También crea las categorías **Boxeo**, **Kickboxing**, **Funcional** y **Sparring** (este último
-permite reservar 1 lugar por inscripción), 12 clases publicadas del organizer (suficientes para
-probar `?page=2&limit=5`) y una clase con cupo 1 para probar el error de cupo.
+También crea las disciplinas **Boxeo**, **Kickboxing**, **Funcional**, **MMA** (permite reservar
+1 lugar por inscripción) y **Taekwondo**, y la **grilla semanal** del club para la semana actual y
+las 3 siguientes: de lunes a sábado, con turnos de mañana y de tarde (22 clases por semana), cada una
+con su sala (Ring principal, Sala de combate, Sala funcional, Jaula), cupo y precio. Las clases que ya
+pasaron no se crean, y volver a correr el seed agrega las semanas que falten sin duplicar nada.
 
 Para crear otros usuarios:
 
@@ -173,6 +176,25 @@ POST /logout   ──► borra la cookie ──► las siguientes requests prote
 Cancelar (`PATCH /api/tickets/:tid/cancel`) no borra el ticket: lo marca `cancelled`, guarda
 `cancelledAt`, libera el cupo y avisa por email al dueño.
 
+## Front
+
+Interfaz web servida por la misma app (Handlebars + CSS + JS vanilla, sin build). Las vistas solo
+arman la estructura: cada página pide sus datos a la API desde el navegador, con la misma cookie
+de sesión. La identidad visual y los tokens están documentados en
+[`design-system/box-club-tucuman/MASTER.md`](design-system/box-club-tucuman/MASTER.md).
+
+| Ruta | Acceso | Qué tiene |
+|---|---|---|
+| `/` | Público | Inicio: próxima clase, disciplinas y cómo funciona |
+| `/clases` | Público | Cartelera agrupada por día, con filtros (disciplina, fechas, lugar), orden y paginación |
+| `/clases/:id` | Público | Detalle de la clase. Con sesión: reserva con cantidad de lugares y código de reserva |
+| `/mis-reservas` | Autenticado | Próximas reservas e historial, con cancelación |
+| `/panel` | `organizer`, `admin` | Mis clases: crear, editar, publicar, cancelar y ver inscriptos con el cupo ocupado |
+| `/admin` | `admin` | Usuarios y cambio de rol, disciplinas |
+| `/login`, `/registro` | Sin sesión | Acceso. Si una página pide sesión, después del login vuelve a ella |
+
+Una página protegida sin sesión redirige a `/login`; con sesión pero sin el rol muestra un 403.
+
 ## Endpoints
 
 Base URL: `http://localhost:8080`
@@ -210,6 +232,9 @@ Query params de `GET /api/events`:
 | `page` | `2` | Página (por defecto `1`) |
 | `limit` | `5` | Resultados por página (por defecto `10`, máximo `50`) |
 
+El listado y el detalle suman a cada evento `taken` (lugares de tickets `confirmed`/`pending`) y
+`available` (`capacity - taken`, nunca negativo). Las respuestas de crear, editar y cambiar estado no los incluyen.
+
 ### Tickets `/api/tickets`
 
 | Método | Ruta | Acceso | Descripción |
@@ -240,7 +265,7 @@ curl -c cookies.txt -X POST http://localhost:8080/api/sessions/login \
 ```
 
 ```json
-{ "status": "success", "message": "Login exitoso", "user": { "_id": "6ad3...", "name": "Olga", "email": "organizer@ringobox.test", "role": "organizer" } }
+{ "status": "success", "message": "Login exitoso", "user": { "_id": "6ad3...", "name": "Lucía", "email": "organizer@ringobox.test", "role": "organizer" } }
 ```
 
 **Crear un evento** (organizer)
@@ -260,7 +285,7 @@ curl -b cookies.txt -X POST http://localhost:8080/api/events \
 ```json
 {
   "status": "success",
-  "data": [ { "_id": "6ad3...", "title": "Sparring - clase 4", "status": "published", "category": { "name": "Sparring" } } ],
+  "data": [ { "_id": "6ad3...", "title": "MMA fundamentos", "status": "published", "category": { "name": "MMA" } } ],
   "page": 2,
   "limit": 5,
   "total": 18,

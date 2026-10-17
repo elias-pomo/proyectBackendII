@@ -23,6 +23,11 @@ export class TicketRepository {
         return await this.dao.countActiveSeats(eventId, session);
     }
 
+    async countActiveSeatsByEvents(eventIds) {
+        if (eventIds.length === 0) return new Map();
+        return await this.dao.countActiveSeatsByEvents(eventIds);
+    }
+
     async findByUser(userId) {
         return await this.dao.findByUser(userId);
     }

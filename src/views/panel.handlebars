@@ -1,0 +1,57 @@
+<div class="container page">
+    <header class="page-head">
+        <div>
+            <div class="eyebrow">{{#if isAdmin}}Todas las clases del club{{else}}Panel del profe{{/if}}</div>
+            <h1 class="display display-lg">{{#if isAdmin}}CLASES{{else}}MIS CLASES{{/if}}</h1>
+        </div>
+        <a href="#form-clase" class="btn" id="btnNueva">Nueva clase</a>
+    </header>
+
+    <div class="facts stats" id="metricas" style="margin-bottom: 64px">
+        <div><div class="label">Publicadas</div><div class="value" data-stat="published">–</div></div>
+        <div><div class="label">Borradores</div><div class="value" data-stat="draft">–</div></div>
+        <div><div class="label">Próximos 7 días</div><div class="value accent" data-stat="week">–</div></div>
+    </div>
+
+    <div class="with-aside">
+        <section class="main">
+            <div class="table-wrap">
+                <table class="table" aria-describedby="metricas">
+                    <thead><tr><th scope="col">Clase</th><th scope="col">Fecha</th><th scope="col">Cupo</th><th scope="col">Estado</th><th scope="col" style="text-align: right">Acciones</th></tr></thead>
+                    <tbody id="tablaClases" aria-live="polite"><tr><td colspan="5"><div class="skeleton" style="border: 0"></div></td></tr></tbody>
+                </table>
+            </div>
+
+            <section id="inscriptos" style="margin-top: 56px" hidden aria-live="polite"></section>
+        </section>
+
+        <aside class="aside panel" id="form-clase">
+            <form class="form-grid" id="formClase" novalidate>
+                <div>
+                    <div class="eyebrow no-line" style="color: var(--rojo-vivo)" id="formModo">Nueva clase</div>
+                    <h2 class="display display-sm" style="margin-top: 10px" id="formTitulo">ARMÁ LA CARTELERA</h2>
+                </div>
+                <div class="field"><label for="c-title">Título</label><input id="c-title" name="title" required minlength="3" placeholder="Boxeo iniciación"></div>
+                <div class="field"><label for="c-category">Disciplina</label><select id="c-category" name="category" required></select></div>
+                <div class="form-row-2">
+                    <div class="field"><label for="c-date">Inicio</label><input id="c-date" name="date" type="datetime-local" required></div>
+                    <div class="field"><label for="c-end">Fin</label><input id="c-end" name="endDate" type="datetime-local" required></div>
+                </div>
+                <div class="form-row-2">
+                    <div class="field"><label for="c-capacity">Cupo</label><input id="c-capacity" name="capacity" type="number" min="1" step="1" required inputmode="numeric"></div>
+                    <div class="field"><label for="c-price">Precio ($)</label><input id="c-price" name="price" type="number" min="0" step="1" value="0" inputmode="numeric"></div>
+                </div>
+                <div class="field"><label for="c-location">Lugar</label><input id="c-location" name="location" required placeholder="Ring principal"></div>
+                <div class="field"><label for="c-description">Descripción</label><textarea id="c-description" name="description" required minlength="10" placeholder="Guardia, desplazamientos y combinaciones simples."></textarea></div>
+                <div class="alert" id="formError" role="alert"></div>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap">
+                    <button type="submit" class="btn" style="flex: 1" data-status="published" id="btnPublicar">Publicar</button>
+                    <button type="submit" class="btn-ghost" style="flex: 1" data-status="draft" id="btnBorrador">Guardar borrador</button>
+                </div>
+                <button type="button" class="btn-text" id="btnCancelarEdicion" hidden>Cancelar edición</button>
+            </form>
+        </aside>
+    </div>
+</div>
+
+<script type="module" src="/js/panel.js"></script>

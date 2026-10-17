@@ -62,6 +62,7 @@ export const fakeTicketRepo = (overrides = {}) => ({
     findByIdWithRelations: async () => null,
     findActiveByUserAndEvent: async () => null,
     countActiveSeats: async () => 0,
+    countActiveSeatsByEvents: async () => new Map(),
     findByUser: async () => [],
     findByEvent: async () => [],
     cancelTicket: async (id) => ({ _id: id, status: 'cancelled', cancelledAt: new Date() }),

@@ -3,30 +3,60 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}} | Ringo Box Gym</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0b0b0b">
+    <title>{{title}} | Box Club Tucumán</title>
+    <link rel="icon" href="/img/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@300;400;500&display=swap">
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <header class="navbar">
-        
-        <a class="brand" href="/">Ringo Box Gym</a>
+<body data-user-id="{{user._id}}" data-user-role="{{user.role}}">
+    <a class="sr-only" href="#contenido">Saltar al contenido</a>
 
-        <nav class="nav-links">
-            <a href="/" class="{{#if (eq page 'home')}}active{{/if}}">Inicio</a>
-        </nav>
+    <header class="site-header">
+        <div class="container">
+            <a class="brand" href="/" aria-label="Box Club Tucumán, inicio">
+                <span class="brand-name">BOX <em>CLUB</em></span>
+                <span class="brand-city">TUCUMÁN</span>
+            </a>
 
-        <div class="nav-user">
-            <span>{{user.first_name}}</span>
-            <span class="badge badge-{{user.role}}">{{user.role}}</span>
-            <button id="btnLogout" class="btn btn-outline btn-sm">Salir</button>
+            <button class="nav-toggle" type="button" aria-controls="nav" aria-expanded="false" aria-label="Abrir menú">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 8h16M4 16h16"/></svg>
+            </button>
+
+            <nav id="nav" class="nav" aria-label="Principal">
+                <a href="/clases" {{#if (eq page 'clases')}}aria-current="page"{{/if}}>Clases</a>
+                {{#if user}}
+                    <a href="/mis-reservas" {{#if (eq page 'reservas')}}aria-current="page"{{/if}}>Mis reservas</a>
+                    {{#if canManage}}<a href="/panel" {{#if (eq page 'panel')}}aria-current="page"{{/if}}>Mi panel</a>{{/if}}
+                    {{#if isAdmin}}<a href="/admin" {{#if (eq page 'admin')}}aria-current="page"{{/if}}>Admin</a>{{/if}}
+                    <span class="nav-sep" aria-hidden="true"></span>
+                    <span class="nav-user">{{user.first_name}} <small>· {{user.role}}</small></span>
+                    <button id="btnLogout" class="nav-logout" type="button">Salir</button>
+                {{else}}
+                    <a href="/#disciplinas">Disciplinas</a>
+                    <a href="/login" class="nav-quiet">Ingresar</a>
+                    <a href="/registro" class="btn-ghost">Asociate</a>
+                {{/if}}
+            </nav>
         </div>
     </header>
 
-    <main class="page">
+    <main id="contenido" class="page-main" style="flex: 1">
         {{{body}}}
     </main>
 
-    <script src="/js/layout.js"></script>
+    <footer class="site-footer">
+        <div class="container">
+            <span class="brand-name">BOX <em>CLUB</em> <span class="brand-city" style="display: inline">TUCUMÁN</span></span>
+            <span>San Miguel de Tucumán</span>
+            <span>Lun a sáb · 07:00 a 22:00</span>
+        </div>
+    </footer>
+
+    <div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+    <script type="module" src="/js/layout.js"></script>
 </body>
 </html>

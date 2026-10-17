@@ -1,0 +1,20 @@
+<div class="container page">
+    <header class="page-head">
+        <div>
+            <div class="eyebrow">Tu agenda</div>
+            <h1 class="display display-lg">MIS RESERVAS</h1>
+        </div>
+    </header>
+
+    <div class="tabs" role="tablist" aria-label="Reservas">
+        <button type="button" role="tab" id="tab-proximas" aria-selected="true" aria-controls="lista">Próximas</button>
+        <button type="button" role="tab" id="tab-historial" aria-selected="false" aria-controls="lista">Historial</button>
+    </div>
+
+    <div id="lista" role="tabpanel" aria-live="polite" aria-busy="true">
+        <div class="skeleton"></div><div class="skeleton"></div>
+    </div>
+</div>
+
+
+<script type="module" src="/js/reservas.js"></script>

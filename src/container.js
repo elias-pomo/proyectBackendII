@@ -23,5 +23,5 @@ const categoryRepository = new CategoryRepository(new CategoriesDAO());
 export const sessionsService = new SessionsService(userRepository);
 export const usersService = new UsersService(userRepository);
 export const categoriesService = new CategoriesService(categoryRepository);
-export const eventsService = new EventsService(eventRepository, categoryRepository);
+export const eventsService = new EventsService(eventRepository, categoryRepository, ticketRepository);
 export const ticketsService = new TicketsService(ticketRepository, eventRepository, categoryRepository, new MailService());

@@ -22,7 +22,7 @@ const row = (label, value) =>
 const emailHtml = ({ message, rows, note }) => `
 <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;border:1px solid #ddd;border-radius:8px;overflow:hidden">
   <div style="background:#000;color:#fff;padding:16px 20px;font-size:20px;font-weight:bold">
-    Ringo Box <span style="color:#d71920">Gym</span>
+    BOX <span style="color:#d71920">CLUB</span> <span style="font-size:12px;letter-spacing:4px;color:#aaa">TUCUMÁN</span>
   </div>
   <div style="padding:20px;color:#222">
     <p>${message}</p>
@@ -79,7 +79,7 @@ export class MailService {
             '',
             note,
             '',
-            'Ringo Box Gym'
+            'Box Club Tucumán'
         ].join('\n');
 
         const html = emailHtml({
@@ -125,7 +125,7 @@ export class MailService {
             '',
             note,
             '',
-            'Ringo Box Gym'
+            'Box Club Tucumán'
         ].join('\n');
 
         const html = emailHtml({

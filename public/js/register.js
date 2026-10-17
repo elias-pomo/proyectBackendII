@@ -1,9 +1,17 @@
+// public/js/register.js
+import { api } from './utils.js';
+
 const form = document.getElementById('registerForm');
 const message = document.getElementById('message');
 
-const showMessage = (text, type = 'error') => {
+const fail = (text, field) => {
+    message.className = 'alert';
     message.textContent = text;
-    message.className = `alert alert-${type}`;
+    form.querySelectorAll('[aria-invalid]').forEach((input) => input.removeAttribute('aria-invalid'));
+    if (field) {
+        form.elements[field].setAttribute('aria-invalid', 'true');
+        form.elements[field].focus();
+    }
 };
 
 form.addEventListener('submit', async (e) => {
@@ -14,29 +22,23 @@ form.addEventListener('submit', async (e) => {
     const email = form.elements.email.value.trim();
     const password = form.elements.password.value;
 
-    if (!first_name || !last_name || !email || !password) return showMessage('Completá todos los campos');
-    if (first_name.length < 3 || last_name.length < 3) return showMessage('El nombre y el apellido deben tener al menos 3 caracteres');
-    if (password.length < 6) return showMessage('La contraseña debe tener al menos 6 caracteres');
-    if (password !== form.elements.confirm.value) return showMessage('Las contraseñas no coinciden');
+    if (first_name.length < 3) return fail('El nombre tiene que tener al menos 3 letras.', 'first_name');
+    if (last_name.length < 3) return fail('El apellido tiene que tener al menos 3 letras.', 'last_name');
+    if (!email) return fail('Ingresá tu email.', 'email');
+    if (password.length < 6) return fail('La contraseña tiene que tener al menos 6 caracteres.', 'password');
+    if (password !== form.elements.confirm.value) return fail('Las contraseñas no coinciden.', 'confirm');
 
     const button = form.querySelector('button');
     button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
 
     try {
-        const response = await fetch('/api/sessions/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ first_name, last_name, email, password })
-        });
-        const data = await response.json();
-
-        if (!response.ok) return showMessage(data.message || data.error || 'No se pudo crear la cuenta');
-
-        showMessage('Cuenta creada. Te llevamos al login…', 'success');
-        setTimeout(() => { window.location.href = '/login'; }, 1200);
-    } catch {
-        showMessage('No se pudo conectar con el servidor');
-    } finally {
+        await api('POST', '/api/sessions/register', { first_name, last_name, email, password });
+        await api('POST', '/api/sessions/login', { email, password });   // entra directo, sin volver a escribir
+        window.location.href = '/clases';
+    } catch (error) {
+        fail(error.status === 409 ? 'Ese email ya tiene una cuenta. Probá ingresando.' : error.message, error.status === 409 ? 'email' : null);
         button.disabled = false;
+        button.removeAttribute('aria-busy');
     }
 });

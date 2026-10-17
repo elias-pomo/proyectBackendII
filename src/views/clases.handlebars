@@ -1,0 +1,43 @@
+<div class="container page">
+    <header class="page-head cal-head">
+        <div>
+            <div class="eyebrow">Cartelera</div>
+            <h1 class="display display-lg">CLASES</h1>
+        </div>
+        <div class="cal-toolbar">
+            <div class="cal-nav" role="group" aria-label="Cambiar de semana">
+                <button type="button" class="cal-arrow" id="semanaAnterior" aria-label="Semana anterior">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+                </button>
+                <div class="cal-range" id="rangoSemana" aria-live="polite"></div>
+                <button type="button" class="cal-arrow" id="semanaSiguiente" aria-label="Semana siguiente">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button type="button" class="btn-text" id="semanaHoy">Hoy</button>
+            </div>
+            <div class="cal-views" role="group" aria-label="Vista">
+                <button type="button" data-view="semana" aria-pressed="true">Semana</button>
+                <button type="button" data-view="lista" aria-pressed="false">Lista</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="chips" id="disciplinas" role="group" aria-label="Filtrar por disciplina">
+        <button type="button" class="chip" data-category="" aria-pressed="true">Todas</button>
+    </div>
+
+    <p class="cal-summary label" id="resumen" aria-live="polite"></p>
+
+    <div id="cartelera" aria-busy="true">
+        <div class="skeleton" style="height: 520px; border: 0"></div>
+    </div>
+
+    <div class="cal-legend" aria-hidden="true">
+        <span><i class="lg lg-open"></i>Con lugar</span>
+        <span><i class="lg lg-booked"></i>Tu reserva</span>
+        <span><i class="lg lg-full"></i>Completa</span>
+        <span><i class="lg lg-now"></i>Ahora</span>
+    </div>
+</div>
+
+<script type="module" src="/js/clases.js"></script>

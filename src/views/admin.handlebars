@@ -1,0 +1,47 @@
+<div class="container page">
+    <header class="page-head">
+        <div>
+            <div class="eyebrow">Administración</div>
+            <h1 class="display display-lg">EL CLUB</h1>
+        </div>
+    </header>
+
+    <div class="with-aside">
+        <section class="main">
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px; margin-bottom: 28px">
+                <h2 class="cond" style="font-size: 26px; letter-spacing: 3px">Usuarios <span class="muted" id="totalUsuarios"></span></h2>
+                <div class="field" style="width: 200px">
+                    <label for="f-role">Filtrar por rol</label>
+                    <select id="f-role"><option value="">Todos</option><option value="user">User</option><option value="organizer">Organizer</option><option value="admin">Admin</option></select>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead><tr><th scope="col">Nombre</th><th scope="col">Email</th><th scope="col">Rol</th><th scope="col" style="text-align: right">Cambiar rol</th></tr></thead>
+                    <tbody id="tablaUsuarios" aria-live="polite"><tr><td colspan="4"><div class="skeleton" style="border: 0"></div></td></tr></tbody>
+                </table>
+            </div>
+        </section>
+
+        <aside class="aside" style="display: flex; flex-direction: column; gap: 32px">
+            <div>
+                <h2 class="cond" style="font-size: 26px; letter-spacing: 3px; margin-bottom: 20px">Disciplinas</h2>
+                <ul id="listaCategorias" style="list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--linea)" aria-live="polite"></ul>
+            </div>
+            <form class="panel form-grid" id="formCategoria" novalidate>
+                <div class="eyebrow no-line" style="color: var(--rojo-vivo)">Nueva disciplina</div>
+                <div class="field"><label for="cat-name">Nombre</label><input id="cat-name" name="name" required minlength="3" placeholder="Muay thai"></div>
+                <div class="field"><label for="cat-description">Descripción</label><input id="cat-description" name="description" placeholder="Codos, rodillas y clinch"></div>
+                <div class="field">
+                    <label for="cat-max">Máximo por reserva</label>
+                    <input id="cat-max" name="maxQuantityPerTicket" type="number" min="1" step="1" inputmode="numeric" placeholder="Sin límite">
+                    <span class="field-hint">Dejalo vacío para que solo rija el cupo de la clase.</span>
+                </div>
+                <div class="alert" id="catError" role="alert"></div>
+                <button type="submit" class="btn">Crear disciplina</button>
+            </form>
+        </aside>
+    </div>
+</div>
+
+<script type="module" src="/js/admin.js"></script>

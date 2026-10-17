@@ -1,7 +1,7 @@
 {
   "name": "proyectocursoi",
   "version": "1.0.0",
-  "description": "API REST de clases e inscripciones para el gimnasio Ringo Box Gym",
+  "description": "API REST de clases e inscripciones para Box Club Tucumán",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

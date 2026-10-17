@@ -1,36 +1,36 @@
+// public/js/login.js
+import { api } from './utils.js';
+
 const form = document.getElementById('loginForm');
 const message = document.getElementById('message');
 
-const showMessage = (text, type = 'error') => {
-    message.textContent = text;
-    message.className = `alert alert-${type}`;
+// Solo se vuelve a rutas internas: un ?next=https://otro-sitio no se respeta
+const nextUrl = () => {
+    const next = new URLSearchParams(window.location.search).get('next');
+    return next && next.startsWith('/') && !next.startsWith('//') ? next : '/clases';
 };
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    message.textContent = '';
 
     const email = form.elements.email.value.trim();
     const password = form.elements.password.value;
-
-    if (!email || !password) return showMessage('Completá el email y la contraseña');
+    if (!email || !password) {
+        message.textContent = 'Completá el email y la contraseña.';
+        return;
+    }
 
     const button = form.querySelector('button');
+    button.setAttribute('aria-busy', 'true');
     button.disabled = true;
 
     try {
-        const response = await fetch('/api/sessions/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await response.json();
-
-        if (!response.ok) return showMessage(data.message || data.error || 'No se pudo iniciar sesión');
-
-        window.location.href = '/';   // la cookie httpOnly ya quedó seteada por el servidor
-    } catch {
-        showMessage('No se pudo conectar con el servidor');
-    } finally {
+        await api('POST', '/api/sessions/login', { email, password });
+        window.location.href = nextUrl();   // la cookie httpOnly ya quedó seteada por el servidor
+    } catch (error) {
+        message.textContent = error.status === 401 ? 'Email o contraseña incorrectos.' : error.message;
         button.disabled = false;
+        button.removeAttribute('aria-busy');
     }
 });

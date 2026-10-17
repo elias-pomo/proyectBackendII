@@ -37,6 +37,16 @@ export class TicketsDAO {
         return result?.total ?? 0;
     }
 
+    // Lo mismo para varios eventos en una sola consulta. Devuelve un Map id → ocupados (solo los que tienen tickets)
+    async countActiveSeatsByEvents(eventIds) {
+        const ids = eventIds.map((id) => new mongoose.Types.ObjectId(String(id)));
+        const results = await ticketModel.aggregate([
+            { $match: { event: { $in: ids }, status: { $in: ACTIVE_TICKET_STATUSES } } },
+            { $group: { _id: '$event', total: { $sum: '$quantity' } } }
+        ]);
+        return new Map(results.map(({ _id, total }) => [String(_id), total]));
+    }
+
     async findByUser(userId) {
         return await ticketModel.find({ user: userId })
             .sort({ createdAt: -1 })

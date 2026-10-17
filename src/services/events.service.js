@@ -62,10 +62,18 @@ const visibilityFilter = (user) => {
     return { status: { $ne: 'draft' } };
 };
 
+// Agrega ocupados y disponibles; nunca negativo si se bajó el cupo con inscriptos
+const withAvailability = (event, taken = 0) => ({
+    ...event,
+    taken,
+    available: Math.max(event.capacity - taken, 0)
+});
+
 export class EventsService {
-    constructor(eventRepository, categoryRepository) {
+    constructor(eventRepository, categoryRepository, ticketRepository) {
     this.eventRepository = eventRepository;
     this.categoryRepository = categoryRepository;
+    this.ticketRepository = ticketRepository;
 }
 
     async getEvents(query = {}, user = null) {
@@ -113,7 +121,11 @@ export class EventsService {
             { sortField, sortDir, page, limit }
         );
 
-        return { data, page, limit, total, totalPages: Math.ceil(total / limit) };
+        // Una sola consulta agregada para todos los eventos de la página
+        const seats = await this.ticketRepository.countActiveSeatsByEvents(data.map((event) => event._id));
+        const withSeats = data.map((event) => withAvailability(event, seats.get(String(event._id))));
+
+        return { data: withSeats, page, limit, total, totalPages: Math.ceil(total / limit) };
     }
 
     async getEventById(id, user = null) {
@@ -122,7 +134,7 @@ export class EventsService {
         const visible = event && (event.status !== 'draft' || user?.role === 'admin' || isOwner(user, event));
         if (!visible) throw new AppError('Evento no encontrado', 404);
 
-        return event;
+        return withAvailability(event, await this.ticketRepository.countActiveSeats(event._id));
     }
 
     async resolveCategory(name) {

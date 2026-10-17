@@ -24,6 +24,8 @@ export const toEventDTO = (event) => ({
     endDate: event.endDate,
     location: event.location,
     capacity: event.capacity,
+    taken: event.taken,           // solo en listado y detalle (los calcula el service)
+    available: event.available,
     price: event.price,
     status: event.status,
     organizer: isPopulated(event.organizer) ? toOrganizerRef(event.organizer) : event.organizer,
