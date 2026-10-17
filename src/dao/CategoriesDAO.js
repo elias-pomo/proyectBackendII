@@ -1,5 +1,5 @@
 // src/dao/CategoriesDAO.js
-import { categoryModel } from './models/category.model.js';
+import { categoryModel } from '../models/category.model.js';
 
 export class CategoriesDAO {
     async findAll() {

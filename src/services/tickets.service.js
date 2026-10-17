@@ -15,15 +15,17 @@ const parseQuantity = (value) => {
 };
 
 export class TicketsService {
-    constructor(ticketRepository, eventRepository, categoryRepository, mailService) {
+    // transaction es inyectable para poder probar el service sin una base (por defecto, la de MongoDB)
+    constructor(ticketRepository, eventRepository, categoryRepository, mailService, transaction = runInTransaction) {
         this.ticketRepository = ticketRepository;
         this.eventRepository = eventRepository;
         this.categoryRepository = categoryRepository;
         this.mailService = mailService;
+        this.transaction = transaction;
     }
 
     async createTicket(eventId, body, user) {
-        const booking = await runInTransaction(async (session) => {
+        const booking = await this.transaction(async (session) => {
             // Candado: toca el evento y lo lee ya bloqueado; lo demás se decide con datos consistentes
             const event = await this.eventRepository.lockForBooking(eventId, session);   // id mal formado: CastError (400)
             if (!event) throw new AppError('Evento no encontrado', 404);

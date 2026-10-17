@@ -1,12 +1,12 @@
-// tests/helpers.js
+// tests/integration/helpers.js
 // Fábricas de datos y atajo para llamar a la API. Se importa desde los tests (después de setup.js).
 import request from 'supertest';
-import app from '../src/app.js';
-import { userModel } from '../src/dao/models/user.model.js';
-import { categoryModel } from '../src/dao/models/category.model.js';
-import { eventModel } from '../src/dao/models/event.model.js';
-import { createHash } from '../src/utils/hash.js';
-import { generateToken } from '../src/utils/jwt.js';
+import app from '../../src/app.js';
+import { userModel } from '../../src/models/user.model.js';
+import { categoryModel } from '../../src/models/category.model.js';
+import { eventModel } from '../../src/models/event.model.js';
+import { createHash } from '../../src/utils/hash.js';
+import { generateToken } from '../../src/utils/jwt.js';
 
 export const DAY = 24 * 60 * 60 * 1000;
 export const HOUR = 60 * 60 * 1000;

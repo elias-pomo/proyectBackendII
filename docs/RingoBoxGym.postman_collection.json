@@ -1,0 +1,1629 @@
+{
+  "info": {
+    "name": "Ringo Box Gym - API de eventos",
+    "description": "Flujo completo de la entrega final. Requiere haber corrido `npm run seed` (usuarios de prueba y categorías). Ejecutar con el Collection Runner en orden.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Registro → login → current → logout → current 401",
+      "item": [
+        {
+          "name": "Registro (usuario nuevo)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newEmail', `nuevo_${Date.now()}@ringobox.test`);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Registro 201', () => pm.response.to.have.status(201));",
+                  "pm.test('El role del body se ignora: siempre user', () => pm.expect(pm.response.json().payload.role).to.eql('user'));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Nuevo\",\n  \"last_name\": \"Usuario\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"Nuevo123!\",\n  \"role\": \"admin\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login (usuario nuevo)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"Nuevo123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Current con sesión",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Current 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Devuelve el usuario logueado', () => pm.expect(pm.response.json().payload.email).to.eql(pm.collectionVariables.get('newEmail')));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "current"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Logout 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "logout"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Current después del logout → 401",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Current sin sesión 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Formato de error', () => pm.expect(pm.response.json().status).to.eql('error'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/current",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "current"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. User intenta crear evento → 403",
+      "item": [
+        {
+          "name": "Crear evento sin sesión → 401",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);",
+                  "pm.collectionVariables.set('eventDate', date.toISOString());",
+                  "pm.collectionVariables.set('eventEndDate', new Date(date.getTime() + 60 * 60 * 1000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Sin sesión 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Clase sin sesión\",\n  \"description\": \"Clase creada desde la colección de Postman\",\n  \"category\": \"Boxeo\",\n  \"date\": \"{{eventDate}}\",\n  \"endDate\": \"{{eventEndDate}}\",\n  \"location\": \"Ring principal\",\n  \"capacity\": 10,\n  \"price\": 0,\n  \"status\": \"published\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User crea evento → 403",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);",
+                  "pm.collectionVariables.set('eventDate', date.toISOString());",
+                  "pm.collectionVariables.set('eventEndDate', new Date(date.getTime() + 60 * 60 * 1000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User sin permisos 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Clase de un user\",\n  \"description\": \"Clase creada desde la colección de Postman\",\n  \"category\": \"Boxeo\",\n  \"date\": \"{{eventDate}}\",\n  \"endDate\": \"{{eventEndDate}}\",\n  \"location\": \"Ring principal\",\n  \"capacity\": 10,\n  \"price\": 0,\n  \"status\": \"published\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Organizer crea evento → user se inscribe → cupo descontado",
+      "item": [
+        {
+          "name": "Login como organizer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{organizerEmail}}\",\n  \"password\": \"{{organizerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer crea evento (cupo 5)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);",
+                  "pm.collectionVariables.set('eventDate', date.toISOString());",
+                  "pm.collectionVariables.set('eventEndDate', new Date(date.getTime() + 60 * 60 * 1000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Evento creado 201', () => pm.response.to.have.status(201));",
+                  "const event = pm.response.json().payload;",
+                  "pm.collectionVariables.set('eventId', event._id);",
+                  "pm.test('El organizer sale de la sesión', () => pm.expect(event.status).to.eql('published'));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Boxeo Postman\",\n  \"description\": \"Clase creada desde la colección de Postman\",\n  \"category\": \"Boxeo\",\n  \"date\": \"{{eventDate}}\",\n  \"endDate\": \"{{eventEndDate}}\",\n  \"location\": \"Ring principal\",\n  \"capacity\": 5,\n  \"price\": 0,\n  \"status\": \"published\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer crea evento con cupo 1",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);",
+                  "pm.collectionVariables.set('eventDate', date.toISOString());",
+                  "pm.collectionVariables.set('eventEndDate', new Date(date.getTime() + 60 * 60 * 1000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Evento creado 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('fullEventId', pm.response.json().payload._id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Sparring cupo único Postman\",\n  \"description\": \"Clase creada desde la colección de Postman\",\n  \"category\": \"Boxeo\",\n  \"date\": \"{{eventDate}}\",\n  \"endDate\": \"{{eventEndDate}}\",\n  \"location\": \"Ring principal\",\n  \"capacity\": 1,\n  \"price\": 0,\n  \"status\": \"published\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User se inscribe → 201 (envía email)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inscripción 201', () => pm.response.to.have.status(201));",
+                  "const ticket = pm.response.json().payload;",
+                  "pm.collectionVariables.set('ticketId', ticket._id);",
+                  "pm.test('Ticket confirmado con código de reserva', () => { pm.expect(ticket.status).to.eql('confirmed'); pm.expect(ticket.reservationCode).to.match(/^RES-/); });",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis tickets (populate del evento)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Mis tickets 200', () => pm.response.to.have.status(200));",
+                  "pm.test('El evento viene poblado', () => pm.expect(pm.response.json().payload[0].event).to.have.property('title'));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/my-tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "my-tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como organizer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{organizerEmail}}\",\n  \"password\": \"{{organizerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer ve inscriptos y cupo descontado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inscriptos 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Cupo descontado: 1 tomado, 4 disponibles', () => pm.expect(pm.response.json().summary).to.eql({ capacity: 5, taken: 1, available: 4 }));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "tickets"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Inscripción duplicada → 409",
+      "item": [
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User se inscribe otra vez → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Duplicado 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Mensaje claro', () => pm.expect(pm.response.json().message).to.match(/inscripción activa/));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "tickets"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Inscripción sin cupo → 409",
+      "item": [
+        {
+          "name": "Login como user2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{user2Email}}\",\n  \"password\": \"{{user2Password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User2 toma el único lugar → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inscripción 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{fullEventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{fullEventId}}",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User intenta inscribirse sin cupo → 409",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Sin cupo 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Mensaje claro', () => pm.expect(pm.response.json().message).to.match(/cupo/i));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{fullEventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{fullEventId}}",
+                "tickets"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cancelar ticket → cupo liberado → nueva inscripción",
+      "item": [
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User cancela su ticket → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Cancelado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Queda cancelled (no se borra)', () => { const t = pm.response.json().payload; pm.expect(t.status).to.eql('cancelled'); pm.expect(t.cancelledAt).to.not.be.null; });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/tickets/{{ticketId}}/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "tickets",
+                "{{ticketId}}",
+                "cancel"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como organizer",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{organizerEmail}}\",\n  \"password\": \"{{organizerPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer ve el cupo liberado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Inscriptos 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Cupo liberado: 0 tomados, 5 disponibles', () => pm.expect(pm.response.json().summary).to.eql({ capacity: 5, taken: 0, available: 5 }));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "tickets"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login como user",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{userPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "User se inscribe de nuevo → 201",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Nueva inscripción 201', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}/tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}",
+                "tickets"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Organizer modifica evento ajeno → 403",
+      "item": [
+        {
+          "name": "Login como organizer2",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{organizer2Email}}\",\n  \"password\": \"{{organizer2Password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Organizer2 modifica evento ajeno → 403",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Evento ajeno 403', () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cambio de otro organizer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Admin modifica evento de otro organizador",
+      "item": [
+        {
+          "name": "Login como admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Setea la cookie currentUser', () => pm.expect(pm.cookies.has('currentUser')).to.be.true);",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/sessions/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "sessions",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin modifica evento ajeno → 200",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Modificado 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Cambió el título', () => pm.expect(pm.response.json().payload.title).to.eql('Boxeo Postman (editado por admin)'));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Boxeo Postman (editado por admin)\",\n  \"price\": 2500\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin lista usuarios (sin password)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Usuarios 200', () => pm.response.to.have.status(200));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9-10. Listado paginado de eventos",
+      "item": [
+        {
+          "name": "GET /api/events?status=published&page=2&limit=5",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Listado 200', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('Estructura paginada', () => pm.expect(body).to.include.keys('status', 'data', 'page', 'limit', 'total', 'totalPages'));",
+                  "pm.test('page 2, limit 5', () => { pm.expect(body.page).to.eql(2); pm.expect(body.limit).to.eql(5); pm.expect(body.data.length).to.be.at.most(5); });",
+                  "pm.test('Solo publicados', () => body.data.forEach((e) => pm.expect(e.status).to.eql('published')));",
+                  "pm.test('La respuesta no contiene password', () => {",
+                  "    pm.expect(pm.response.text()).to.not.match(/password|\\$2[aby]\\$/i);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/events?status=published&page=2&limit=5",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "published"
+                },
+                {
+                  "key": "page",
+                  "value": "2"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "adminEmail",
+      "value": "admin@ringobox.test"
+    },
+    {
+      "key": "adminPassword",
+      "value": "Admin123!"
+    },
+    {
+      "key": "organizerEmail",
+      "value": "organizer@ringobox.test"
+    },
+    {
+      "key": "organizerPassword",
+      "value": "Organizer123!"
+    },
+    {
+      "key": "organizer2Email",
+      "value": "organizer2@ringobox.test"
+    },
+    {
+      "key": "organizer2Password",
+      "value": "Organizer123!"
+    },
+    {
+      "key": "userEmail",
+      "value": "user@ringobox.test"
+    },
+    {
+      "key": "userPassword",
+      "value": "User123!"
+    },
+    {
+      "key": "user2Email",
+      "value": "user2@ringobox.test"
+    },
+    {
+      "key": "user2Password",
+      "value": "User123!"
+    },
+    {
+      "key": "eventId",
+      "value": ""
+    },
+    {
+      "key": "fullEventId",
+      "value": ""
+    },
+    {
+      "key": "ticketId",
+      "value": ""
+    },
+    {
+      "key": "newEmail",
+      "value": ""
+    },
+    {
+      "key": "eventDate",
+      "value": ""
+    },
+    {
+      "key": "eventEndDate",
+      "value": ""
+    }
+  ]
+}

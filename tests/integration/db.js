@@ -1,10 +1,10 @@
-// tests/db.js
+// tests/integration/db.js
 // Conexión y limpieza de la base de test. Importa solo modelos (nada que lea config).
 import mongoose from 'mongoose';
-import { userModel } from '../src/dao/models/user.model.js';
-import { categoryModel } from '../src/dao/models/category.model.js';
-import { eventModel } from '../src/dao/models/event.model.js';
-import { ticketModel } from '../src/dao/models/ticket.model.js';
+import { userModel } from '../../src/models/user.model.js';
+import { categoryModel } from '../../src/models/category.model.js';
+import { eventModel } from '../../src/models/event.model.js';
+import { ticketModel } from '../../src/models/ticket.model.js';
 
 export const connectTestDb = async () => {
     if (mongoose.connection.readyState === 0) {

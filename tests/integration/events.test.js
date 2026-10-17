@@ -1,7 +1,7 @@
-// tests/events.test.js
+// tests/integration/events.test.js
 import { expect } from 'chai';
 import mongoose from 'mongoose';
-import { eventModel } from '../src/dao/models/event.model.js';
+import { eventModel } from '../../src/models/event.model.js';
 import { resetEvents } from './db.js';
 import { api, createUser, createCategory, createEvent, eventPayload, DAY, HOUR } from './helpers.js';
 

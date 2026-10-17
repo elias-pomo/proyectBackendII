@@ -1,6 +1,6 @@
 // src/dao/TicketsDAO.js
 import mongoose from 'mongoose';
-import { ticketModel } from './models/ticket.model.js';
+import { ticketModel } from '../models/ticket.model.js';
 import { ACTIVE_TICKET_STATUSES } from '../constants/statuses.js';
 
 export class TicketsDAO {

@@ -1,9 +1,9 @@
-// tests/tickets.concurrency.test.js
+// tests/integration/tickets.concurrency.test.js
 // Disparan pedidos simultáneos contra la API para comprobar que el cupo y los duplicados
 // quedan protegidos por la transacción. Requieren un replica set (Atlas lo es).
 import { expect } from 'chai';
-import { ticketModel } from '../src/dao/models/ticket.model.js';
-import { ACTIVE_TICKET_STATUSES } from '../src/constants/statuses.js';
+import { ticketModel } from '../../src/models/ticket.model.js';
+import { ACTIVE_TICKET_STATUSES } from '../../src/constants/statuses.js';
 import { resetDb, resetEvents, resetTickets, supportsTransactions } from './db.js';
 import { api, createUser, createCategory, createEvent } from './helpers.js';
 

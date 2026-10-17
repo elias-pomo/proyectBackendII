@@ -1,0 +1,6 @@
+{
+    "spec": ["tests/integration/**/*.test.js"],
+    "file": ["tests/integration/setup.js"],
+    "timeout": 10000,
+    "exit": true
+}

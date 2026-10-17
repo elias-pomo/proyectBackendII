@@ -1,15 +1,19 @@
 {
   "name": "proyectocursoi",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "API REST de clases e inscripciones para el gimnasio Ringo Box Gym",
+  "main": "src/server.js",
   "scripts": {
-    "test": "mocha",
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "seed": "node src/scripts/seed.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "mocha --config tests/unit/.mocharc.json",
+    "test:integration": "mocha --config tests/integration/.mocharc.json"
   },
   "engines": {
-    "node": ">=20.11" },
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -25,7 +29,6 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1",
     "nodemailer": "^10.0.13",
-    "nodemon": "^3.1.14",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0"
@@ -33,6 +36,7 @@
   "devDependencies": {
     "chai": "^6.2.2",
     "mocha": "^12.0.1",
+    "nodemon": "^3.1.14",
     "supertest": "^7.2.2"
   }
 }

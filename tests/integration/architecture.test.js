@@ -1,7 +1,7 @@
 import request from 'supertest';
 import mongoose from 'mongoose';
 import { expect } from 'chai';
-import app from '../src/app.js';
+import app from '../../src/app.js';
 import { resetDb } from './db.js';
 import { api, createUser, createCategory, createEvent, eventPayload } from './helpers.js';
 

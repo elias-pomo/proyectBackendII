@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { USER_ROLES } from '../../constants/statuses.js';
+import { USER_ROLES } from '../constants/statuses.js';
 
 
 const userCollection = 'users';

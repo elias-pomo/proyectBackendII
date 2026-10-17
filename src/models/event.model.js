@@ -1,6 +1,6 @@
-// src/dao/models/event.model.js
+// src/models/event.model.js
 import mongoose from "mongoose";
-import { EVENT_STATUSES } from '../../constants/statuses.js';
+import { EVENT_STATUSES } from '../constants/statuses.js';
 
 
 const EventsSchema = new mongoose.Schema(

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { createHash, validaHash } from '../src/utils/hash.js';
+import { createHash, validaHash } from '../../src/utils/hash.js';
 
 describe('Pruebas de hash con bcrypt', () => {
 it('debe hashear la contraseña y no ser igual al texto plano', () => {

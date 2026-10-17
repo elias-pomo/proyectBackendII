@@ -4,7 +4,7 @@ import { config } from '../config/config.js';
 const cookieExtractor = (req) => req?.cookies?.currentUser ?? null;
 
 export const createJwtStrategy = (sessionsService) => new JwtStrategy(
-    { jwtFromRequest: cookieExtractor, secretOrKey: config.general.SECRET },
+    { jwtFromRequest: cookieExtractor, secretOrKey: config.general.JWT_SECRET },
     async (payload, done) => {
         try {
             const user = await sessionsService.getUserById(payload._id);

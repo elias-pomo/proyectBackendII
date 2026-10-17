@@ -1,4 +1,4 @@
-import { eventModel } from './models/event.model.js';
+import { eventModel } from '../models/event.model.js';
 
 const CATEGORY_FIELDS = 'name color maxQuantityPerTicket';
 const ORGANIZER_FIELDS = 'first_name last_name';

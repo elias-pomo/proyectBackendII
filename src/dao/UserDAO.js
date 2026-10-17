@@ -1,4 +1,4 @@
-import { userModel } from './models/user.model.js';
+import { userModel } from '../models/user.model.js';
 
 export class UserDAO {
     // Único método que devuelve password: solo para validar credenciales en el login
